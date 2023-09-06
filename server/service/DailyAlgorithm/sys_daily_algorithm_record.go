@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/DailyAlgorithm"
 	DailyAlgorithmReq "github.com/flipped-aurora/gin-vue-admin/server/model/DailyAlgorithm/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"log"
 	"time"
 )
@@ -76,6 +77,19 @@ func (DARService *DailyAlgorithmRecordService) GetCoverDailyAlgorithmRecord(date
 func (DARService *DailyAlgorithmRecordService) GetDailyAlgorithmRecordInfoList(info DailyAlgorithmReq.DailyAlgorithmRecordSearch) (list []DailyAlgorithm.DailyAlgorithmRecord, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
+	var uuid string
+
+	if info.User_name != "" {
+		// 创建db
+		var user system.SysUser
+		db := global.GVA_DB.Model(&system.SysUser{})
+		err = db.Where("nick_name = ?", info.User_name).Find(&user).Error
+		if err != nil {
+			return
+		}
+		uuid = user.UUID.String()
+	}
+
 	// 创建db
 	db := global.GVA_DB.Model(&DailyAlgorithm.DailyAlgorithmRecord{})
 	var DARs []DailyAlgorithm.DailyAlgorithmRecord
@@ -86,8 +100,8 @@ func (DARService *DailyAlgorithmRecordService) GetDailyAlgorithmRecordInfoList(i
 	if info.Date != nil {
 		db = db.Where("date = ?", info.Date)
 	}
-	if info.User_name != "" {
-		db = db.Where("user_name = ?", info.User_name)
+	if uuid != "" {
+		db = db.Where("user_name = ?", uuid)
 	}
 	err = db.Count(&total).Error
 	if err != nil {

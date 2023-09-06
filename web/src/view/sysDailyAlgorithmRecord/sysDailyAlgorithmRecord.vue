@@ -11,7 +11,7 @@
         </div>
 
         <div class="form-item">
-          <label for="link" class="form-label">链接：</label>
+          <label for="link" class="form-label">题目链接：</label>
           <input type="text" id="link" v-model="link" class="input" placeholder="url链接">
         </div>
 
@@ -39,21 +39,6 @@ import calendar from "./calendar.vue";
 import sysDailyAlgorithmRecordForm from "./sysDailyAlgorithmRecordForm.vue";
 import InformationList from "./InformationList.vue";
 
-// ...
-import {
-  createDailyAlgorithmRecord,
-  deleteDailyAlgorithmRecord,
-  deleteDailyAlgorithmRecordByIds,
-  updateDailyAlgorithmRecord,
-  findDailyAlgorithmRecord,
-  getDailyAlgorithmRecordList
-} from '@/api/sysDailyAlgorithmRecord'
-// 全量引入格式化工具 请按需保留
-import { setSelfInfo, changePassword } from '@/api/user.js'
-import { reactive, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
-import SelectImage from '@/components/selectImage/selectImage.vue'
-
 export default {
   name: 'sysDailyAlgorithmRecord',
   // ...
@@ -69,7 +54,7 @@ export default {
       showModal: false,
       link: '',
       code: '',
-      codeText: "```\n语言类型（例如cpp）\n你的代码\n```",
+      codeText: "这里放你的代码",
     };
   },
   methods: {

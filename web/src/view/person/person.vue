@@ -71,13 +71,13 @@
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="账号绑定" name="second">
               <ul>
-                <li>
+                <!-- <li>
                   <p class="title">密保手机</p>
                   <p class="desc">
                     已绑定手机:{{ userStore.userInfo.phone }}
                     <a href="javascript:void(0)" @click="changePhoneFlag = true">立即修改</a>
                   </p>
-                </li>
+                </li> -->
                 <li>
                   <p class="title">QQ号</p>
                   <p class="desc">
@@ -85,19 +85,31 @@
                   </p>
                 </li>
                 <li>
+                  <p class="title">手机号</p>
+                  <p class="desc">
+                    手机号:{{ userStore.userInfo.phone }}
+                  </p>
+                </li>
+                <li>
+                  <p class="title">邮箱</p>
+                  <p class="desc">
+                    邮箱:{{ userStore.userInfo.email }}
+                  </p>
+                </li>
+                <!-- <li>
                   <p class="title">密保邮箱</p>
                   <p class="desc">
                     已绑定邮箱：{{ userStore.userInfo.email }}
                     <a href="javascript:void(0)" @click="changeEmailFlag = true">立即修改</a>
                   </p>
-                </li>
-                <li>
+                </li> -->
+                <!-- <li>
                   <p class="title">密保问题</p>
                   <p class="desc">
                     未设置密保问题
                     <a href="javascript:void(0)">去设置</a>
                   </p>
-                </li>
+                </li> -->
                 <li>
                   <p class="title">修改密码</p>
                   <p class="desc">

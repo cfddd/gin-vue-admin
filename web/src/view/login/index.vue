@@ -47,6 +47,15 @@
                 <el-button class="shadow shadow-blue-600 h-11 w-full" type="primary" size="large" @click="submitForm">登
                   录</el-button>
               </el-form-item>
+              <!-- <el-form-item class="mb-6">
+                <el-button
+                  class="shadow shadow-blue-600 h-11 w-full"
+                  type="primary"
+                  size="large"
+                  @click="checkInit"
+                >前往初始化</el-button> 
+              </el-form-item>
+              -->
 
             </el-form>
           </div>
@@ -129,8 +138,8 @@ loginVerify()
 const loginForm = ref(null)
 const picPath = ref('')
 const loginFormData = reactive({
-  username: 'CFD',
-  password: '123456',
+  username: "",
+  password: "",
   captcha: '',
   captchaId: '',
   openCaptcha: false,

@@ -53,19 +53,15 @@ import {
 } from '@/api/sysDailyAlgorithmRecord'
 
 // 自动获取字典
-import { getDictFunc } from '@/utils/format'
-import { useRoute, useRouter } from "vue-router"
+import { useRoute } from "vue-router"
 import { ElMessage } from 'element-plus'
 import { ref, reactive } from 'vue'
-import { onMounted, watch, toRefs } from 'vue'
+import { onMounted, toRefs } from 'vue'
 
 import { useUserStore } from '@/pinia/modules/user'
-import SelectImage from '@/components/selectImage/selectImage.vue'
-import SysDailyAlgorithmRecord from './sysDailyAlgorithmRecord.vue'
 
 const userStore = useUserStore()
 const route = useRoute()
-const router = useRouter()
 // Props
 const props = defineProps({
   link: String,
