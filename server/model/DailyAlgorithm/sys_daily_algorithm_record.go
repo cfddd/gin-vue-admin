@@ -10,7 +10,7 @@ import (
 // DailyAlgorithmRecord 结构体
 type DailyAlgorithmRecord struct {
 	global.GVA_MODEL
-	Date      *time.Time     `json:"date" form:"date" gorm:"column:date;comment:日期;"`
+	Date      *time.Time     `json:"date" form:"date" gorm:"column:date;type:date;comment:日期;"`
 	User_name string         `json:"user_name" form:"user_name" gorm:"column:user_name;comment:用户名;"`
 	Link      string         `json:"link" form:"link" gorm:"column:link;comment:题目链接;"`
 	Code      datatypes.JSON `json:"code" form:"code" gorm:"column:code;comment:代码;"`
