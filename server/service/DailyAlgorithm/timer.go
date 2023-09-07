@@ -4,6 +4,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/DailyAlgorithm"
 	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
 	"time"
 )
 
@@ -93,6 +94,7 @@ func RemoveCountedOutDate() (err error) {
 
 // Timer
 // 定义一个名为timer的函数,新开一个goroutine，检测时间，每天更新每日打卡
+// sb代码，在docker中莫名其妙用不了，改用别人写好的函数
 func Timer() (err error) {
 
 	//每次运行，调用一次更新30天内的函数，保证数据的可维护性
@@ -103,47 +105,52 @@ func Timer() (err error) {
 	}
 	global.GVA_LOG.Info("DACount Counted")
 
-	// 获取当前时间
-	now := time.Now()
+	//corn框架中的定时器
+	t := timer.NewTimerTask()
 
-	// 计算距离下一个00:00的持续时间
-	nextMidnight := now.Add(time.Duration(24-now.Hour()) * time.Hour)
-	nextMidnight = nextMidnight.Add(time.Duration(-now.Minute()) * time.Minute)
-	nextMidnight = nextMidnight.Add(time.Duration(-now.Second()) * time.Second)
-
-	// 计算下一个00:00的时间间隔
-	interval := nextMidnight.Sub(now)
-
-	// 创建一个Ticker，用于每天定时执行
-	ticker := time.NewTicker(interval)
-
-	// 在一个独立的goroutine中处理定时任务
-	go func() {
-		for {
-			<-ticker.C
-			global.GVA_LOG.Info("processed counted work")
-
-			err = RemoveCountedOutDate()
-			//每次运行报错，就调用获得最新的数据
-			if err != nil {
-				global.GVA_LOG.Error("process counted work occur to error ")
-				CountDailyAlgorithmRank()
-			}
-
-			// 更新下一个00:00的时间间隔
-			nextMidnight = nextMidnight.Add(24 * time.Hour)
-			interval = nextMidnight.Sub(time.Now())
-			ticker.Reset(interval)
+	_, err = t.AddTaskByFunc("DAFunc", "@midnight", func() {
+		err := RemoveCountedOutDate()
+		if err != nil {
+			global.GVA_LOG.Error("process counted work occur to error ,recalculate")
+			CountDailyAlgorithmRank()
 		}
-	}()
-
-	// 让程序保持运行状态
-	select {}
-}
-
-//多线程就要考虑对数据库写入的互斥操作
-//chatgpt帮我写好了互斥在DA的service里面
-
-func DATimer() {
-	go Timer()
+		global.GVA_LOG.Info("update succeed") // 每天打印一遍
+	})
+	//// 获取当前时间
+	//now := time.Now()
+	//
+	//// 计算距离下一个00:00的持续时间
+	//nextMidnight := now.Add(time.Duration(24-now.Hour()) * time.Hour)
+	//nextMidnight = nextMidnight.Add(time.Duration(-now.Minute()) * time.Minute)
+	//nextMidnight = nextMidnight.Add(time.Duration(-now.Second()) * time.Second)
+	//
+	//// 计算下一个00:00的时间间隔
+	//interval := nextMidnight.Sub(now)
+	//
+	//// 创建一个Ticker，用于每天定时执行
+	//ticker := time.NewTicker(interval)
+	//
+	//// 在一个独立的goroutine中处理定时任务
+	//go func() {
+	//	for {
+	//		<-ticker.C
+	//		global.GVA_LOG.Info("processed counted work")
+	//
+	//		err = RemoveCountedOutDate()
+	//		//每次运行报错，就调用获得最新的数据
+	//		if err != nil {
+	//			global.GVA_LOG.Error("process counted work occur to error ")
+	//			CountDailyAlgorithmRank()
+	//		}
+	//
+	//		// 更新下一个00:00的时间间隔
+	//		nextMidnight = nextMidnight.Add(24 * time.Hour)
+	//		interval = nextMidnight.Sub(time.Now())
+	//		ticker.Reset(interval)
+	//	}
+	//}()
+	//
+	//// 让程序保持运行状态
+	//select {}
+	return err
 }

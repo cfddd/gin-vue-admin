@@ -7,7 +7,7 @@ aliyun-oss:
     base-path: yourBasePath
 autocode:
     transfer-restart: true
-    root: D:\goland\gin-vue-admin
+    root: /
     server: /server
     server-api: /api/v1/%s
     server-plug: /plugin/%s
@@ -83,7 +83,7 @@ hua-wei-obs:
     access-key: you-access-key
     secret-key: you-secret-key
 jwt:
-    signing-key: 0a4c9558-df48-4523-89f7-e756a26c60dd
+    signing-key: b2e0aa11-227c-4809-bf18-30b2934c4a57
     expires-time: 7d
     buffer-time: 1d
     issuer: qmPlus
@@ -105,7 +105,7 @@ mssql:
     log-mode: ""
     log-zap: false
 mysql:
-    path: 127.0.0.1
+    path: 177.7.0.13
     port: "3306"
     config: charset=utf8mb4&parseTime=True&loc=Local
     db-name: gva

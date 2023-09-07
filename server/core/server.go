@@ -37,7 +37,7 @@ func RunWindowsServer() {
 	global.GVA_LOG.Info("server run success on ", zap.String("address", address))
 
 	//每日一题排行榜每日更新
-	DailyAlgorithm.DATimer()
+	DailyAlgorithm.Timer()
 
 	fmt.Printf(`
 	欢迎使用 gin-vue-admin

@@ -30,4 +30,5 @@ func Timer() {
 			}(global.GVA_CONFIG.Timer.Detail[i])
 		}
 	}
+
 }
