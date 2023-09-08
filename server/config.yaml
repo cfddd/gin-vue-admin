@@ -105,7 +105,7 @@ mssql:
     log-mode: ""
     log-zap: false
 mysql:
-    path: 177.7.0.13
+    path: 127.0.0.1
     port: "3306"
     config: charset=utf8mb4&parseTime=True&loc=Local
     db-name: gva
