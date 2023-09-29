@@ -1,6 +1,7 @@
 package DailyAlgorithm
 
 import (
+	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/DailyAlgorithm"
 	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
@@ -22,18 +23,31 @@ func CountDailyAlgorithmRank() (err error) {
 	// 定义一个键值对数组，用于存储该月用户的打卡天数
 	rank := make(map[string]int)
 
+	// 就算是打卡次数为0，也需要记录一下，为下面rank的map可以更新到所有用户
+	// 所以要再遍历一遍所有用户，先加入map中
+	var uuidList []string
+	uuidList, err = system.GetUserUuidList()
+	if err != nil {
+		return
+	}
+	for _, uuid := range uuidList {
+		rank[uuid] = 0
+	}
+
 	// 获取当前日期
 	now := time.Now()
 
 	// 循环遍历过去30天的日期
+
 	for i := 0; i < 30; i++ {
 		// 计算当前日期的字符串表示
 		date := now.AddDate(0, 0, -i).Format("2006-01-02")
-
+		fmt.Println(date)
 		// 创建db
-		db := global.GVA_DB.Model(&DailyAlgorithm.DailyAlgorithmRecord{})
-		var DARs []DailyAlgorithm.DailyAlgorithmRecord
+		// 在这里是因为循环导包
 
+		var DARs []DailyAlgorithm.DailyAlgorithmRecord
+		db := global.GVA_DB.Model(&DailyAlgorithm.DailyAlgorithmRecord{})
 		db = db.Where("date = ?", date)
 
 		err = db.Find(&DARs).Error
@@ -44,6 +58,7 @@ func CountDailyAlgorithmRank() (err error) {
 		}
 
 		// 定义一个键值对数组，用于该日用户是否打卡
+		// 如果数据库中出现了重复用户和日期打的打卡，有更好的健壮性
 		isExist := make(map[string]bool)
 		for _, record := range DARs {
 			if isExist[record.User_name] == false {
@@ -51,9 +66,11 @@ func CountDailyAlgorithmRank() (err error) {
 			}
 			isExist[record.User_name] = true
 		}
+
 	}
 
 	for name, cnt := range rank {
+		fmt.Println(name, cnt)
 		system.CoverDACount(name, cnt)
 	}
 
@@ -93,7 +110,7 @@ func RemoveCountedOutDate() (err error) {
 }
 
 // Timer
-// 定义一个名为timer的函数,新开一个goroutine，检测时间，每天更新每日打卡
+// 定义一个名为timer的函数,新开一个goroutine，检测时间，每天（午夜24点）更新每日打卡
 // sb代码，在docker中莫名其妙用不了，改用别人写好的函数
 func Timer() (err error) {
 
