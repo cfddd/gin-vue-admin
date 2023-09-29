@@ -192,13 +192,11 @@ func (DARApi *DailyAlgorithmRecordApi) CoverDailyAlgorithmRecord(c *gin.Context)
 }
 
 // GetDailyAlgorithmRecordList 分页获取DailyAlgorithmRecord列表
-// @Tags DailyAlgorithmRecord
+// @Tags GetDailyAlgorithmRecordList
 // @Summary 分页获取DailyAlgorithmRecord列表
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data query DailyAlgorithmReq.DailyAlgorithmRecordSearch true "分页获取DailyAlgorithmRecord列表"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
 // @Router /DAR/getDailyAlgorithmRecordList [get]
 func (DARApi *DailyAlgorithmRecordApi) GetDailyAlgorithmRecordList(c *gin.Context) {
 	var pageInfo DailyAlgorithmReq.DailyAlgorithmRecordSearch

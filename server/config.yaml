@@ -105,11 +105,11 @@ mssql:
     log-mode: ""
     log-zap: false
 mysql:
-    path: 127.0.0.1
+    path: "177.7.0.13"
     port: "3306"
-    config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: gva
-    username: root
+    config: "charset=utf8mb4&parseTime=True&loc=Local"
+    db-name: "gva"
+    username: "root"
     password: "123456"
     prefix: ""
     singular: false

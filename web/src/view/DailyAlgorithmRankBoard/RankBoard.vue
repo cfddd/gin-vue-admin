@@ -99,7 +99,7 @@ const getTableData = async () => {
     pageSize.value = table.data.pageSize
 
     limitSize.value = total.value / 5
-    console.log(limitSize.value)
+    // console.log(limitSize.value)
   }
 }
 

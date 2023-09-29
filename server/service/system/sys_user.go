@@ -3,13 +3,13 @@ package system
 import (
 	"errors"
 	"fmt"
+	"github.com/gofrs/uuid/v5"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
-	"github.com/gofrs/uuid/v5"
 	"gorm.io/gorm"
 )
 
@@ -274,4 +274,14 @@ func UpdateDACount(user_name string, x int) (err error) {
 
 func CoverDACount(user_name string, x int) (err error) {
 	return global.GVA_DB.Model(&system.SysUser{}).Where("uuid = ?", user_name).Update("da_count_in_mouth", x).Error
+}
+
+//@function: GetUserUuidList
+//@description: 获取所有用户的uuid
+//@param:
+//@return: err error, list []string
+
+func GetUserUuidList() (list []string, err error) {
+	err = global.GVA_DB.Model(&system.SysUser{}).Select("uuid").Find(&list).Error
+	return
 }
