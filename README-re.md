@@ -129,3 +129,48 @@ find找到后，会给formData赋值，并且type赋值为update
 接下来的updata操作只传递了需要更新的字段，有点不解
 去后台看源码，发现gorm调用的save函数是自动根据根据primary字段查找的
 找到则更新,没找到则创建
+
+## docker 部署
+### 1.从github上拉取源码
+```
+git clone https://github.com/cfddd/gin-vue-admin.git
+```
+### 2.拉取镜像
+```
+docker pull cfddfc/whpu:server
+docker pull cfddfc/whpu:web
+```
+
+### 3.运行代码
+[详细内容参考](https://www.gin-vue-admin.com/guide/deployment/docker-compose.html#docker-compose-yaml%E8%AF%A6%E8%A7%A3)
+
+**首先需要进入项目根目录**
+
+启动容器
+
+```
+# 使用docker-compose启动四个容器
+docker-compose -f deploy/docker-compose/docker-compose.yaml up
+# 如果您修改了某些配置选项,可以使用此命令重新打包镜像
+docker-compose -f deploy/docker-compose/docker-compose.yaml up --build
+# 使用docker-compose 后台启动
+docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
+# 使用docker-compose 重新打包镜像并后台启动
+docker-compose -f deploy/docker-compose/docker-compose.yaml up --build -d
+```
+### 配置数据库信息
+就是把数据库文件信息以sql文件导出，然后进入mysql容器里面再导入
+
+数据卷怎么上传？不会(看了官网的文档，使用ORS上传到dockerHub上，然后再拉下来，然后替换就可以了，感觉也没有很方便……)！
+
+至于为什么不写进启动的命令里，是因为每次启动都会调用这些命令行，所以只在第一次部署的时候注入
+
+> 导出的命令是mysqldump -u root -p -P 13306 gva > D:\goland\gin-vue-admin\dump.mysql
+
+下面是把sql文件导入数据库的命令
+
+```
+mysql -u root -p -P 13306 gva < ./dump.mysql
+```
+
+没有mysql！！！，还是选择上传volume吧
