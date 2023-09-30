@@ -168,15 +168,29 @@ docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
 
 至于为什么不写进启动的命令里，是因为每次启动都会调用这些命令行，所以只在第一次部署的时候注入
 
-> 导出的命令是mysqldump -u root -p -P 13306 gva > D:\goland\gin-vue-admin\dump.mysql
+> 导出的命令是mysqldump -u root -p -P 13306 gva > D:\goland\gin-vue-admin\dump.sql 
+>
+> 该命令是用于从一个 SQL 文件中恢复一个数据库的。但是，如果您的 SQL 文件是用 Windows PowerShell 和 mysqldump 命令创建的，可能会出现编码问题。因为 PowerShell 的默认编码是 UTF-16，而 MySQL 不支持这种编码1。这可能导致您的 SQL 文件中出现一些不可识别的字符，从而引发错误。
+>
+> 解决这个问题的方法之一是，使用 --result-file 选项来生成 ASCII 格式的输出文件1。例如：
+>
+> mysqldump -u root -p -P 13306 gva --result-file=D:\goland\gin-vue-admin\dump.sql
+> 
+> 然后，您可以用这个文件来恢复数据库：
+
+mysql -u root -p --binary-mode --force gva < dump.sql
 
 下面是把sql文件导入数据库的命令
 
 ```
+docker stop gva-server 
+
 docker cp dump.mysql gva-mysql:/
 # 复制文件dump.mysql到gva-mysql容器里面
 
 docker exec -it gva-mysql /bin/bash
+
+drop database gva;
 
 mysql -u root -p -P 13306 gva < ./dump.mysql
 # mysql -u root -p --binary-mode --force gva < ./dump.mysql
