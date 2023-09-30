@@ -141,7 +141,14 @@ docker pull cfddfc/whpu:server
 docker pull cfddfc/whpu:web
 ```
 
-### 3.运行代码
+### 3.生成镜像
+需要修改名字为原来使用的名字
+```
+docker tag cfddfc/whpu:server docker-compose-server:latest
+docker tag cfddfc/whpu:web docker-compose-web:latest
+```
+
+### 4.运行代码
 [详细内容参考](https://www.gin-vue-admin.com/guide/deployment/docker-compose.html#docker-compose-yaml%E8%AF%A6%E8%A7%A3)
 
 **首先需要进入项目根目录**
@@ -151,14 +158,10 @@ docker pull cfddfc/whpu:web
 ```
 # 使用docker-compose启动四个容器
 docker-compose -f deploy/docker-compose/docker-compose.yaml up
-# 如果您修改了某些配置选项,可以使用此命令重新打包镜像
-docker-compose -f deploy/docker-compose/docker-compose.yaml up --build
 # 使用docker-compose 后台启动
 docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
-# 使用docker-compose 重新打包镜像并后台启动
-docker-compose -f deploy/docker-compose/docker-compose.yaml up --build -d
 ```
-### 配置数据库信息
+### 5.配置数据库信息
 就是把数据库文件信息以sql文件导出，然后进入mysql容器里面再导入
 
 数据卷怎么上传？不会(看了官网的文档，使用ORS上传到dockerHub上，然后再拉下来，然后替换就可以了，感觉也没有很方便……)！
@@ -170,7 +173,13 @@ docker-compose -f deploy/docker-compose/docker-compose.yaml up --build -d
 下面是把sql文件导入数据库的命令
 
 ```
-mysql -u root -p -P 13306 gva < ./dump.mysql
-```
+docker cp dump.mysql gva-mysql:/
+# 复制文件dump.mysql到gva-mysql容器里面
 
-没有mysql！！！，还是选择上传volume吧
+docker exec -it gva-mysql /bin/bash
+
+mysql -u root -p -P 13306 gva < ./dump.mysql
+# mysql -u root -p --binary-mode --force gva < ./dump.mysql
+# 导入数据库
+```
+### 6.完成
