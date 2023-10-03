@@ -3,7 +3,7 @@ FROM node:16
 WORKDIR /gva_web/
 COPY . .
 
-RUN bash -c "yarn config set registry https://registry.npm.taobao.org --global && yarn install && yarn serve"
+RUN yarn && yarn build
 
 FROM nginx:alpine
 LABEL MAINTAINER="SliverHorn@sliver_horn@qq.com"

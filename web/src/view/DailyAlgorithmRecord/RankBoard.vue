@@ -46,12 +46,14 @@
       </el-form>
     </div>
     <div class="gva-table-box">
-      <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID"
-        @selection-change="handleSelectionChange">
+      <el-table style="width: 100%" tooltip-effect="dark" :data="tableData" row-key="ID">
         <el-table-column type="index" align="center" :resizable="false" label="序号" width="100">
         </el-table-column>
         <el-table-column align="center" label="日期" width="180">
           <template #default="scope">{{ formatDate(scope.row.date).substring(0, 10) }}</template>
+        </el-table-column>
+        <el-table-column align="center" label="时间" width="180">
+          <template #default="scope">{{ formatDate(scope.row.CreatedAt).substring(11, 19) }}</template>
         </el-table-column>
         <el-table-column align="center" label="用户昵称" prop="user_name" width="180" />
         <el-table-column align="center" label="打卡详情" width="180">

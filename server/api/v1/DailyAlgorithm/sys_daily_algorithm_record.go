@@ -210,7 +210,8 @@ func (DARApi *DailyAlgorithmRecordApi) GetDailyAlgorithmRecordList(c *gin.Contex
 		response.FailWithMessage("获取失败", c)
 	} else {
 		// 这里纯数是设计数据库的问题，在记录中使用唯一的uuid，返回给前端要的是nickname，要再查一次数据库
-		for i := 0; i < len(list); i++ {
+		n := len(list)
+		for i := 0; i < n; i++ {
 			tmp, err := service.ServiceGroupApp.SystemServiceGroup.UserService.FindUserByUuid(list[i].User_name)
 			if err != nil {
 				response.FailWithMessage(err.Error(), c)

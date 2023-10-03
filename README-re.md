@@ -149,15 +149,13 @@ docker tag cfddfc/whpu:web docker-compose-web:latest
 ```
 
 ### 4.运行代码
-[详细内容参考](https://www.gin-vue-admin.com/guide/deployment/docker-compose.html#docker-compose-yaml%E8%AF%A6%E8%A7%A3)
+[详细内容](https://www.gin-vue-admin.com/guide/deployment/docker-compose.html#docker-compose-yaml%E8%AF%A6%E8%A7%A3)
 
 **首先需要进入项目根目录**
 
 启动容器
 
 ```
-# 使用docker-compose启动四个容器
-docker-compose -f deploy/docker-compose/docker-compose.yaml up
 # 使用docker-compose 后台启动
 docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
 ```
@@ -168,32 +166,46 @@ docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
 
 至于为什么不写进启动的命令里，是因为每次启动都会调用这些命令行，所以只在第一次部署的时候注入
 
-> 导出的命令是mysqldump -u root -p -P 13306 gva > D:\goland\gin-vue-admin\dump.sql 
+> 导出的命令是mysqldump -u root -p -P 13306 gva > D:\goland\gin-vue-admin\dumpAll.sql 
 >
 > 该命令是用于从一个 SQL 文件中恢复一个数据库的。但是，如果您的 SQL 文件是用 Windows PowerShell 和 mysqldump 命令创建的，可能会出现编码问题。因为 PowerShell 的默认编码是 UTF-16，而 MySQL 不支持这种编码1。这可能导致您的 SQL 文件中出现一些不可识别的字符，从而引发错误。
 >
 > 解决这个问题的方法之一是，使用 --result-file 选项来生成 ASCII 格式的输出文件1。例如：
 >
-> mysqldump -u root -p -P 13306 gva --result-file=D:\goland\gin-vue-admin\dump.sql
+> mysqldump -u root -p -P 13306 gva --result-file=D:\goland\gin-vue-admin\dumpAll.sql
 > 
+>-P是宿主机链接数据库的端口
+>
 > 然后，您可以用这个文件来恢复数据库：
-
-mysql -u root -p --binary-mode --force gva < dump.sql
 
 下面是把sql文件导入数据库的命令
 
 ```
 docker stop gva-server 
+# 先关闭server容器（反正在数据库迁移后需要重启server容器）
 
-docker cp dump.mysql gva-mysql:/
-# 复制文件dump.mysql到gva-mysql容器里面
+docker cp dumpAll.sql gva-mysql:/
+# 复制文件dumpAll.sql到gva-mysql容器里面
 
 docker exec -it gva-mysql /bin/bash
+# 进入gva-mysql容器
 
-drop database gva;
-
-mysql -u root -p -P 13306 gva < ./dump.mysql
-# mysql -u root -p --binary-mode --force gva < ./dump.mysql
-# 导入数据库
+mysql -u root -p --binary-mode --force gva < ./dumpAll.sql
+# 导入sql文件
 ```
 ### 6.完成
+退出容器，然后重新启动容器
+```
+exit
+# 退出容器
+docker-compose -f deploy/docker-compose/docker-compose.yaml up
+# 使用docker-compose启动四个容器
+docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
+# 后台启动
+```
+
+接下来就可以访问了
+地址为服务器IP:端口
+```
+http://xxxx:8080
+```

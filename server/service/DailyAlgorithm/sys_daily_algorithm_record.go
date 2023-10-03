@@ -74,6 +74,9 @@ func (DARService *DailyAlgorithmRecordService) GetCoverDailyAlgorithmRecord(date
 
 // GetDailyAlgorithmRecordInfoList 分页获取DailyAlgorithmRecord记录
 // Author [piexlmax](https://github.com/piexlmax)
+// 两种用法：
+// 1.获取在每日算法打卡记录列表里面使用，info的User_name为空，查询所有的打卡记录
+// 2.获取某一个用户的全部打卡记录，info的User_name不为空，在查询时多查询一次，先找到uuid再在记录里面查询
 func (DARService *DailyAlgorithmRecordService) GetDailyAlgorithmRecordInfoList(info DailyAlgorithmReq.DailyAlgorithmRecordSearch) (list []DailyAlgorithm.DailyAlgorithmRecord, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
@@ -93,6 +96,10 @@ func (DARService *DailyAlgorithmRecordService) GetDailyAlgorithmRecordInfoList(i
 	// 创建db
 	db := global.GVA_DB.Model(&DailyAlgorithm.DailyAlgorithmRecord{})
 	var DARs []DailyAlgorithm.DailyAlgorithmRecord
+
+	// Add order by id desc
+	db = db.Order("id DESC")
+
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)

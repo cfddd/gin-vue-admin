@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="left-section">
-      <h2 class="section-title">你好，来提交每日一题吧！</h2>
+      <h2 class="section-title">你好，来打卡每日一题吧！</h2>
       <form @submit.prevent="submitData" class="data-form">
         <div class="form-item">
           <label for="code" class="form-label" >提交代码：</label>
