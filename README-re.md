@@ -130,6 +130,71 @@ find找到后，会给formData赋值，并且type赋值为update
 去后台看源码，发现gorm调用的save函数是自动根据根据primary字段查找的
 找到则更新,没找到则创建
 
+## 关于如何批量增加用户
+因为注册用户在逻辑上不太易于实现，且实际作用不大，于是选择做一个批量导入用户的功能
+```
+LOCK TABLES `sys_users` WRITE;
+/*!40000 ALTER TABLE `sys_users` DISABLE KEYS */;
+INSERT INTO `sys_users` VALUES (2,'2023-08-05 16:52:03.971','2023-10-03 12:40:35.389',NULL,'c51eb03c-62e0-4d16-bd8d-d8cbef3f4487','a303176530','$2a$10$RvLUU4mPpXwYiscWyl/INu.UanzclFMqDdTy8OR.tWDl5aroxrx0.','用户1','dark','https://qmplusimg.henrongyi.top/1576554439myAvatar.png','#fff','#1890ff',1,'17611111111','333333@qq.com',1,'29090',0);
+/*!40000 ALTER TABLE `sys_users` ENABLE KEYS */;
+UNLOCK TABLES;
+```
+上面是一个普通用户的sql语句
+先加上事务锁住表，然后再添加语句
+id为主键，可以忽略
+创建时间和更新时间可以是现在的时间
+删除时间为NULL
+uuid需要特别注意，使用代码生成
+username输入
+password加密初始密码123456
+nickname和username相同
+sidemode为'dark'
+header_img为'https://qmplusimg.henrongyi.top/1576554439myAvatar.png'
+后面全部和上面的sql语句相同
+
+```
+#// Register User register structure
+#type Register struct {
+#	Username     string `json:"userName" example:"用户名"`
+#	Password     string `json:"passWord" example:"密码"`
+#	NickName     string `json:"nickName" example:"昵称"`
+#	HeaderImg    string `json:"headerImg" example:"头像链接"`
+#	AuthorityId  uint   `json:"authorityId" swaggertype:"string" example:"int 角色id"`
+#	Enable       int    `json:"enable" swaggertype:"string" example:"int 是否启用"`
+#	AuthorityIds []uint `json:"authorityIds" swaggertype:"string" example:"[]uint 角色id"`
+#	Phone        string `json:"phone" example:"电话号码"`
+#	Email        string `json:"email" example:"电子邮箱"`
+#}
+```
+这是一个user结构体，请你用go语言输入相关必要字段
+
+### 代码
+从写好的register接口出发，移植了该部分
+做成了一个能T行输入用户的代码
+
+批量导入用户，userList文件格式如下
+一个T表示行数，行的格式如下
+Username NickName Phone Email QQ
+---
+> 运行命令
+> ./go_build_adduser_go_linux
+
+
+### 如何使用（docker部署完成之后）
+
+首先需要进入项目根目录
+
+```
+# 修改/server/addUser/usersList文件中的内容
+docker cp server\addUser gva-server:/go/src/github.com/flipped-aurora/gin-vue-admin/server
+# 把这个小工具所在文件夹复制到gva-server中
+docker exec -it gva-server /bin/sh
+# 进入gva-server容器中
+cd ./addUser
+./go_build_adduser_go_linux
+```
+运行成功后注意检查是否有报错，用户的username不可以有重复的
+创建的用户都是普通用户
 ## docker 部署
 ### 1.从github上拉取源码
 ```
