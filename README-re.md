@@ -186,11 +186,13 @@ Username NickName Phone Email QQ
 
 ```
 # 修改/server/addUser/usersList文件中的内容
-docker cp server\addUser gva-server:/go/src/github.com/flipped-aurora/gin-vue-admin/server
+docker cp ./server/addUser gva-server:/go/src/github.com/flipped-aurora/gin-vue-admin/server
 # 把这个小工具所在文件夹复制到gva-server中
 docker exec -it gva-server /bin/sh
 # 进入gva-server容器中
 cd ./addUser
+chmod +x ./go_build_adduser_go_linux
+# 增加权限
 ./go_build_adduser_go_linux
 ```
 运行成功后注意检查是否有报错，用户的username不可以有重复的
