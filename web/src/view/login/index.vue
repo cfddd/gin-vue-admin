@@ -40,13 +40,14 @@
                 <el-button class="shadow shadow-blue-600 h-11 w-full" type="primary" size="large"
                   @click="showPopup">注册</el-button>
               </el-form-item>
-              <!-- <el-dialog :visible="popupVisible" title="注册" @close="closePopup"> --> -->
-                <register />
-              <!-- </el-dialog> -->
-
-
-
             </el-form>
+            <div v-if="popupVisible" class="modal-wrapper">
+              <div class="modal">
+                <register />
+                <el-button class="shadow shadow-blue-600 h-11 w-full" type="primary" size="large"
+                  @click="closePopup">返回登录</el-button>
+              </div>
+          </div>
           </div>
         </div>
       </div>
@@ -85,9 +86,7 @@ export default {
   },
   methods: {
     showPopup() {
-      console.log(this.popupVisible)
       this.popupVisible = true; // 显示弹窗
-      console.log(this.popupVisible)
     },
     closePopup() {
       this.popupVisible = false; // 关闭弹窗
@@ -184,3 +183,27 @@ const submitForm = () => {
 }
 
 </script>
+
+<style scoped>
+.modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* 半透明背景 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #ccc;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+</style>

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	systemReq "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	plugGlobal "github.com/flipped-aurora/gin-vue-admin/server/plugin/register/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/plugin/register/model"
 	userService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
@@ -16,7 +15,6 @@ type RegisterService struct{}
 
 func (e *RegisterService) PlugService(req model.Request) (res *system.SysUser, err error) {
 	if err := utils.Verify(req, utils.LoginVerify); err != nil {
-		// TODO resopne need
 		return res, err
 	}
 	var (
@@ -27,7 +25,8 @@ func (e *RegisterService) PlugService(req model.Request) (res *system.SysUser, e
 	if !store.Verify(req.CaptchaId, req.Captcha, true) {
 		return res, errors.New("验证码错误")
 	}
-	u := &system.SysUser{Username: req.Username, Password: req.Password, NickName: req.Username}
+
+	u := &system.SysUser{Username: req.Username, Password: req.Password, NickName: req.Username, Phone: req.Phone, Email: req.Email, QQ: req.QQ}
 	err = global.GVA_DB.Where("username = ?", u.Username).Preload("Authorities").Preload("Authority").First(&user).Error
 	if err == nil {
 		return res, errors.New("用户名已注册")
@@ -36,13 +35,13 @@ func (e *RegisterService) PlugService(req model.Request) (res *system.SysUser, e
 		return res, errors.New("用户名已注册")
 	}
 
-	var sysAuthority systemReq.Register
-	sysAuthority.Username = u.Username
-	sysAuthority.NickName = u.Username
-	sysAuthority.Password = u.Password
-	// TODO 角色ID
-	sysAuthority.AuthorityId = plugGlobal.GlobalConfig.AuthorityId
-	sysAuthority.AuthorityIds = append(sysAuthority.AuthorityIds, plugGlobal.GlobalConfig.AuthorityId)
+	var authorities []system.SysAuthority
+
+	authorities = append(authorities, system.SysAuthority{
+		AuthorityId: plugGlobal.GlobalConfig.AuthorityId,
+	})
+	u.Authorities = authorities
+	u.AuthorityId = plugGlobal.GlobalConfig.AuthorityId
 
 	if rest, err := us.Register(*u); err != nil {
 		return &rest, errors.New("注册失败!")

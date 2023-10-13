@@ -111,7 +111,6 @@ func RemoveCountedOutDate() (err error) {
 }
 
 // Timer
-// 定义一个名为timer的函数,新开一个goroutine，检测时间，每天（午夜24点）更新每日打卡
 // sb代码，在docker中莫名其妙用不了，改用别人写好的函数
 func Timer() (err error) {
 

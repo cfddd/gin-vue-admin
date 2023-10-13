@@ -15,14 +15,14 @@ type SysUser struct {
 	HeaderImg      string         `json:"headerImg" gorm:"default:https://qmplusimg.henrongyi.top/gva_header.jpg;comment:用户头像"` // 用户头像
 	BaseColor      string         `json:"baseColor" gorm:"default:#fff;comment:基础颜色"`                                           // 基础颜色
 	ActiveColor    string         `json:"activeColor" gorm:"default:#1890ff;comment:活跃颜色"`                                      // 活跃颜色
-	AuthorityId    uint           `json:"authorityId" gorm:"default:888;comment:用户角色ID"`                                        // 用户角色ID
+	AuthorityId    uint           `json:"authorityId" gorm:"default:1;comment:用户角色ID"`                                          // 用户角色ID
 	Authority      SysAuthority   `json:"authority" gorm:"foreignKey:AuthorityId;references:AuthorityId;comment:用户角色"`
 	Authorities    []SysAuthority `json:"authorities" gorm:"many2many:sys_user_authority;"`
-	Phone          string         `json:"phone"  gorm:"comment:用户手机号"`                     // 用户手机号
-	Email          string         `json:"email"  gorm:"comment:用户邮箱"`                      // 用户邮箱
-	QQ             string         `json:"qq" gorm:"comment:用户QQ"`                          //用户QQ
-	Enable         int            `json:"enable" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"` //用户是否被冻结 1正常 2冻结
-	DACountInMouth int            `json:"da_count_in_mouth" gorm:"comment:本月打卡次数"`         // 本月内打卡次数
+	Phone          string         `json:"phone"  gorm:"comment:用户手机号"`                       // 用户手机号
+	Email          string         `json:"email"  gorm:"comment:用户邮箱"`                        // 用户邮箱
+	QQ             string         `json:"qq" gorm:"comment:用户QQ"`                            //用户QQ
+	Enable         int            `json:"enable" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"`   //用户是否被冻结 1正常 2冻结
+	DACountInMouth int            `json:"da_count_in_mouth" gorm:"default:0;comment:本月打卡次数"` // 本月内打卡次数
 }
 
 func (SysUser) TableName() string {

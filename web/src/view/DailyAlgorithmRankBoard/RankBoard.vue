@@ -1,6 +1,6 @@
 <template>
   <div>
-    <warning-bar title="注：默认按照打卡次数排序，总用户数前20%（上取整）的用户标新" />
+    <warning-bar title="注：默认按照打卡次数排序，总用户数前20%（上取整）的用户标✨" />
     <div class="gva-table-box">
       <el-table :data="tableData">
         <el-table-column type="index" align="center" :resizable="false" label="排名" width="100">

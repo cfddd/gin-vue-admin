@@ -9,6 +9,9 @@ import (
 type Request struct {
 	Username  string `json:"username"`  // 用户名
 	Password  string `json:"password"`  // 密码
+	QQ        string `json:"qq"`        // QQ
+	Phone     string `json:"phone"`     // 手机
+	Email     string `json:"email"`     // 邮箱
 	Captcha   string `json:"captcha"`   // 验证码
 	CaptchaId string `json:"captchaId"` // 验证码ID
 }
