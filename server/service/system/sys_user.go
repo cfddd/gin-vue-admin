@@ -29,6 +29,7 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 	// 否则 附加uuid 密码hash加密 注册
 	u.Password = utils.BcryptHash(u.Password)
 	u.UUID = uuid.Must(uuid.NewV4())
+	fmt.Println(u.NickName)
 	err = global.GVA_DB.Create(&u).Error
 	return u, err
 }

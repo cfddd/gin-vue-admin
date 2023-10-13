@@ -106,6 +106,7 @@ func RemoveCountedOutDate() (err error) {
 	for _, record := range DARs {
 		system.UpdateDACount(record.User_name, -1)
 	}
+
 	return nil
 }
 
@@ -133,41 +134,5 @@ func Timer() (err error) {
 		}
 		global.GVA_LOG.Info("update succeed") // 每天打印一遍
 	})
-	//// 获取当前时间
-	//now := time.Now()
-	//
-	//// 计算距离下一个00:00的持续时间
-	//nextMidnight := now.Add(time.Duration(24-now.Hour()) * time.Hour)
-	//nextMidnight = nextMidnight.Add(time.Duration(-now.Minute()) * time.Minute)
-	//nextMidnight = nextMidnight.Add(time.Duration(-now.Second()) * time.Second)
-	//
-	//// 计算下一个00:00的时间间隔
-	//interval := nextMidnight.Sub(now)
-	//
-	//// 创建一个Ticker，用于每天定时执行
-	//ticker := time.NewTicker(interval)
-	//
-	//// 在一个独立的goroutine中处理定时任务
-	//go func() {
-	//	for {
-	//		<-ticker.C
-	//		global.GVA_LOG.Info("processed counted work")
-	//
-	//		err = RemoveCountedOutDate()
-	//		//每次运行报错，就调用获得最新的数据
-	//		if err != nil {
-	//			global.GVA_LOG.Error("process counted work occur to error ")
-	//			CountDailyAlgorithmRank()
-	//		}
-	//
-	//		// 更新下一个00:00的时间间隔
-	//		nextMidnight = nextMidnight.Add(24 * time.Hour)
-	//		interval = nextMidnight.Sub(time.Now())
-	//		ticker.Reset(interval)
-	//	}
-	//}()
-	//
-	//// 让程序保持运行状态
-	//select {}
 	return err
 }

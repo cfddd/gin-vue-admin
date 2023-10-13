@@ -1,8 +1,7 @@
 <template>
   <div id="userLayout" class="w-full h-full relative">
     <div
-      class="rounded-lg flex items-center justify-evenly w-full h-full bg-white md:w-screen md:h-screen md:bg-[#194bfb]"
-    >
+      class="rounded-lg flex items-center justify-evenly w-full h-full bg-white md:w-screen md:h-screen md:bg-[#194bfb]">
       <div class="md:w-3/5 w-10/12 h-full flex items-center justify-evenly">
         <div class="oblique h-[130%] w-3/5 bg-white transform -rotate-12 absolute -ml-52" />
         <!-- 分割斜块 -->
@@ -16,24 +15,14 @@
               <p class="text-center text-sm font-normal text-gray-500 mt-2.5">A management platform using Golang and Vue
               </p>
             </div>
-            <el-form
-              ref="loginForm"
-              :model="loginFormData"
-              :rules="rules"
-              :validate-on-rule-change="false"
-              @keyup.enter="submitForm"
-            >
+            <el-form ref="loginForm" :model="loginFormData" :rules="rules" :validate-on-rule-change="false"
+              @keyup.enter="submitForm">
               <el-form-item prop="username" class="mb-6">
                 <el-input v-model="loginFormData.username" size="large" placeholder="请输入用户名" suffix-icon="user" />
               </el-form-item>
               <el-form-item prop="password" class="mb-6">
-                <el-input
-                  v-model="loginFormData.password"
-                  show-password
-                  size="large"
-                  type="password"
-                  placeholder="请输入密码"
-                />
+                <el-input v-model="loginFormData.password" show-password size="large" type="password"
+                  placeholder="请输入密码" />
               </el-form-item>
               <el-form-item v-if="loginFormData.openCaptcha" prop="captcha" class="mb-6">
                 <div class="flex w-full justify-between">
@@ -47,17 +36,22 @@
                 <el-button class="shadow shadow-blue-600 h-11 w-full" type="primary" size="large" @click="submitForm">登
                   录</el-button>
               </el-form-item>
-             
+              <el-form-item class="mb-6">
+                <el-button class="shadow shadow-blue-600 h-11 w-full" type="primary" size="large"
+                  @click="showPopup">注册</el-button>
+              </el-form-item>
+              <!-- <el-dialog :visible="popupVisible" title="注册" @close="closePopup"> --> -->
+                <register />
+              <!-- </el-dialog> -->
+
+
 
             </el-form>
           </div>
         </div>
       </div>
-      <div class="hidden md:block w-1/2 h-full float-right bg-[#194bfb]"><img
-        class="h-full"
-        src="@/assets/algorithm.png"
-        alt="banner"
-      ></div>
+      <div class="hidden md:block w-1/2 h-full float-right bg-[#194bfb]"><img class="h-full" src="@/assets/algorithm.png"
+          alt="banner"></div>
     </div>
 
     <BottomInfo class="left-0 right-0 absolute bottom-3 mx-auto  w-full z-20">
@@ -80,14 +74,33 @@
 </template>
 
 <script>
+import register from "./register.vue"
+
 export default {
   name: 'Login',
+  data() {
+    return {
+      popupVisible: false, // 控制弹窗的显示与隐藏
+    };
+  },
+  methods: {
+    showPopup() {
+      console.log(this.popupVisible)
+      this.popupVisible = true; // 显示弹窗
+      console.log(this.popupVisible)
+    },
+    closePopup() {
+      this.popupVisible = false; // 关闭弹窗
+    },
+  },
+  components: {
+    register,
+  }
 }
 </script>
 
 <script setup>
 import { captcha } from '@/api/user'
-import { checkDB } from '@/api/initdb'
 import BottomInfo from '@/view/layout/bottomInfo/bottomInfo.vue'
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
@@ -112,7 +125,7 @@ const checkPassword = (rule, value, callback) => {
 
 // 获取验证码
 const loginVerify = () => {
-  captcha({}).then(async(ele) => {
+  captcha({}).then(async (ele) => {
     rules.captcha.push({
       max: ele.data.captchaLength,
       min: ele.data.captchaLength,
@@ -148,11 +161,11 @@ const rules = reactive({
 })
 
 const userStore = useUserStore()
-const login = async() => {
+const login = async () => {
   return await userStore.LoginIn(loginFormData)
 }
 const submitForm = () => {
-  loginForm.value.validate(async(v) => {
+  loginForm.value.validate(async (v) => {
     if (v) {
       const flag = await login()
       if (!flag) {
@@ -168,22 +181,6 @@ const submitForm = () => {
       return false
     }
   })
-}
-
-// 跳转初始化
-const checkInit = async() => {
-  const res = await checkDB()
-  if (res.code === 0) {
-    if (res.data?.needInit) {
-      userStore.NeedInit()
-      router.push({ name: 'Init' })
-    } else {
-      ElMessage({
-        type: 'info',
-        message: '已配置数据库信息，无法初始化',
-      })
-    }
-  }
 }
 
 </script>

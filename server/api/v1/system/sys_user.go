@@ -151,13 +151,32 @@ func (b *BaseApi) Register(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
+
+	// 用户默认信息
+	r.NickName = r.Username
+	r.HeaderImg = "https://qmplusimg.henrongyi.top/1576554439myAvatar.png"
+	r.AuthorityIds = []uint{1} //默认1为普通用户
+	r.AuthorityId = 1
 	var authorities []system.SysAuthority
 	for _, v := range r.AuthorityIds {
 		authorities = append(authorities, system.SysAuthority{
 			AuthorityId: v,
 		})
 	}
-	user := &system.SysUser{Username: r.Username, NickName: r.NickName, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId, Authorities: authorities, Enable: r.Enable, Phone: r.Phone, Email: r.Email}
+
+	user := &system.SysUser{
+		Username:       r.Username,
+		NickName:       r.NickName,
+		Password:       r.Password,
+		HeaderImg:      r.HeaderImg,
+		AuthorityId:    r.AuthorityId,
+		Authorities:    authorities,
+		Enable:         r.Enable,
+		Phone:          r.Phone,
+		Email:          r.Email,
+		DACountInMouth: 0,
+		QQ:             r.QQ,
+	}
 	userReturn, err := userService.Register(*user)
 	if err != nil {
 		global.GVA_LOG.Error("注册失败!", zap.Error(err))

@@ -26,7 +26,7 @@ func main() {
 	global.GVA_LOG = core.Zap() // 初始化zap日志库
 	zap.ReplaceGlobals(global.GVA_LOG)
 	global.GVA_DB = initialize.Gorm() // gorm连接数据库
-	initialize.Timer()
+	initialize.Timer()                // 初始化定时任务,清理数据库中的一些表
 	initialize.DBList()
 	if global.GVA_DB != nil {
 		initialize.RegisterTables() // 初始化表
