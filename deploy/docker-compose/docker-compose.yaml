@@ -65,6 +65,7 @@ services:
       MYSQL_PASSWORD: '123456'
     volumes:
       - mysql:/var/lib/mysql
+      - ./dumpAll.sql:/docker-entrypoint-initdb.d/init.sql  # 特殊路径，MySQL 镜像会在容器启动时自动执行该路径下的 SQL 文件。
     networks:
       network:
         ipv4_address: 177.7.0.13
@@ -81,3 +82,4 @@ services:
     networks:
       network:
         ipv4_address: 177.7.0.14
+  
