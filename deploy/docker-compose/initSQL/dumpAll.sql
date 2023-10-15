@@ -1,4 +1,4 @@
-CREATE DATABASE gva;
+CREATE DATABASE IF NOT EXISTS gva DEFAULT CHARACTER SET utf8mb4 COLLATE 'utf8mb4_unicode_ci';
 USE gva;
 -- MySQL dump 10.13  Distrib 8.0.32, for Win64 (x86_64)
 --
