@@ -25,7 +25,7 @@ redis:
 
 # email configuration
 email:
-  to: xxx@qq.com
+  to: 2909047212@qq.com
   port: 465
   from: xxx@163.com
   host: smtp.163.com

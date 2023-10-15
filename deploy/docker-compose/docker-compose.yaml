@@ -64,7 +64,7 @@ services:
       MYSQL_USER: 'root'
       MYSQL_PASSWORD: '123456'
     volumes: 
-      - ./dumpAll.sql:/docker-entrypoint-initdb.d/dumpAll.sql
+      - dumpAll.sql:/docker-entrypoint-initdb.d/   # 该路径下容器启动时自动执行sql文件，用于初始化数据库。
       - mysql:/var/lib/mysql
 
     networks:
