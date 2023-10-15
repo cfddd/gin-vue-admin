@@ -30,7 +30,7 @@ services:
     networks:
       network:
         ipv4_address: 177.7.0.11
-    image: docker-compose-web:latest
+
 
   server:
     build:
@@ -49,7 +49,7 @@ services:
     networks:
       network:
         ipv4_address: 177.7.0.12
-    image: docker-compose-server:latest
+
 
   mysql:
     image: mysql:8.0.21       # 如果您是 arm64 架构：如 MacOS 的 M1，请修改镜像为 image: mysql/mysql-server:8.0.21
