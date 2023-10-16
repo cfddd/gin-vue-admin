@@ -17,7 +17,7 @@ services:
   mysql:
     image: mysql:8.0.21       # 如果您是 arm64 架构：如 MacOS 的 M1，请修改镜像为 image: mysql/mysql-server:8.0.21
     container_name: gva-mysql
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci #设置utf8字符集
+    command: ['mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci', 'mysql -u root -p"$MYSQL_ROOT_PASSWORD" --binary-mode --force gva < ./docker-entrypoint-initdb.d/dumpAll.sql'] #设置utf8字符集
     restart: always
     ports:
       - "13306:3306"  # host物理直接映射端口为13306
@@ -27,7 +27,7 @@ services:
       MYSQL_USER: 'root'
       MYSQL_PASSWORD: '123456'
     volumes: 
-      # - ./initSQL:/docker-entrypoint-initdb.d/   # 把这个目录挂载到mysql中/docker-entrypoint-initdb.d/，该路径下容器启动时自动执行sql文件，用于初始化数据库。
+      - ./initSQL:/docker-entrypoint-initdb.d/   # 把这个目录挂载到mysql中/docker-entrypoint-initdb.d/，该路径下容器启动时自动执行sql文件，用于初始化数据库。
       # 为什么没用？？？
       - mysql:/var/lib/mysql
 
