@@ -175,7 +175,7 @@ header_img为'https://qmplusimg.henrongyi.top/1576554439myAvatar.png'
 批量导入用户，userList文件格式如下
 一个T表示行数，行的格式如下
 Username NickName Phone Email QQ
----
+
 > 运行命令
 > ./go_build_adduser_go_linux
 
@@ -275,4 +275,13 @@ docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
 地址为服务器IP:端口
 ```
 http://xxxx:8080
+```
+## docker自动执行sql文件
+每次需要删除卷，才可以重新生成一遍
+删除卷之前要将正在使用卷的容器停止
+```
+docker stop gva-mysql
+docker rm gva-mysql
+docker volume rm docker-compose_mysql
+docker-compose -f deploy/docker-compose/docker-compose.yaml up --build -d
 ```
