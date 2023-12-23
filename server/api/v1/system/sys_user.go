@@ -419,6 +419,7 @@ func (b *BaseApi) SetUserInfo(c *gin.Context) {
 		Enable:         user.Enable,
 		QQ:             user.QQ,
 		DACountInMouth: user.DACountInMouth,
+		LcName:         user.LcName,
 	})
 	if err != nil {
 		global.GVA_LOG.Error("设置失败!", zap.Error(err))
@@ -457,6 +458,7 @@ func (b *BaseApi) SetSelfInfo(c *gin.Context) {
 		Enable:         user.Enable,
 		QQ:             user.QQ,
 		DACountInMouth: user.DACountInMouth,
+		LcName:         user.LcName,
 	})
 	if err != nil {
 		global.GVA_LOG.Error("设置失败!", zap.Error(err))

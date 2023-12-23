@@ -38,6 +38,8 @@ func RunWindowsServer() {
 
 	//每日一题排行榜每日更新定时器，刚启动项目时运行一次
 	go DailyAlgorithm.Timer()
+	//项目启动时爬取一次积分，之后定时每周爬取一次
+	go DailyAlgorithm.Crawl()
 
 	fmt.Printf(`
 	欢迎使用 gin-vue-admin

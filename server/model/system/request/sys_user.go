@@ -56,4 +56,5 @@ type ChangeUserInfo struct {
 	Enable         int                   `json:"enable" gorm:"comment:冻结用户"`                                                           //冻结用户
 	Authorities    []system.SysAuthority `json:"-" gorm:"many2many:sys_user_authority;"`
 	DACountInMouth int                   `json:"da_count_in_mouth" gorm:"comment:用户本月打卡次数"`
+	LcName         string                `json:"lc_name" gorm:"comment:力扣ID"`
 }

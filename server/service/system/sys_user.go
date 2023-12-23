@@ -328,6 +328,34 @@ func CoverDACount(user_name string, x int) (err error) {
 //@return: err error, list []string
 
 func GetUserUuidList() (list []string, err error) {
-	err = global.GVA_DB.Model(&system.SysUser{}).Where("uuid is not NUll").Select("uuid").Find(&list).Error
+	err = global.GVA_DB.Model(&system.SysUser{}).Select("uuid").Find(&list).Error
+	return
+}
+
+type UserLcRating struct {
+	id     int64  `json:"id" gorm:"column:id"`
+	LcName string `json:"lc_name" gorm:"column:lc_name"`
+}
+
+func GetUserLcRatingList() (err error) {
+	var list []UserLcRating
+	err = global.GVA_DB.Model(&system.SysUser{}).Select("id,lc_name").Where("lc_name is not null").Find(&list).Error
+	if err != nil {
+		return err
+	}
+
+	var crawler utils.LcRating
+	crawler, err = utils.NewLcRating()
+
+	for _, v := range list {
+		var rating float64
+		rating, err = crawler.GetLcRating(v.LcName)
+		ratingInt := int(rating)
+		if err != nil {
+			ratingInt = 0
+		}
+		err = global.GVA_DB.Model(&system.SysUser{}).Where("id = ?", v.id).Update("lc_rate", ratingInt).Error
+	}
+
 	return
 }

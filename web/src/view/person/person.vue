@@ -1,5 +1,8 @@
 <template>
   <div>
+    <warning-bar
+      title="LeetCodeID是一串纯英文的字符串，例如https://leetcode.cn/u/LeetCodeID/ 里的LeetCodeID。LeetCodeRating每周自动更新一次"
+    />
     <el-row>
       <el-col :span="6">
         <div class="fl-left avatar-box">
@@ -38,21 +41,20 @@
                     <el-icon>
                       <data-analysis />
                     </el-icon>
-                    {{ userStore.userInfo.qq }}
+                    LeetCodeRating：{{ userStore.userInfo.lc_rate }}
                   </li>
-
+                  <li>
+                    <el-icon>
+                      <medal />
+                    </el-icon>
+                    {{ userStore.userInfo.da_count_all }}
+                  </li>
                 <li>
                   <el-icon>
                     <video-camera />
                   </el-icon>
                   {{ userStore.userInfo.email }}
                 </li>
-                  <li>
-                    <el-icon>
-                      <medal />
-                    </el-icon>
-                    {{ userStore.userInfo.phone }}
-                  </li>
 
               </ul>
             </div>
@@ -80,6 +82,17 @@
                   <p class="title">邮箱</p>
                   <p class="desc">
                     邮箱:{{ userStore.userInfo.email }}
+                  </p>
+                  
+                </li>
+                <li>
+                  <p class="title">LeetCodeID</p>
+                  <p class="desc">
+                    LeetCodeID:{{ userStore.userInfo.lc_name }}
+                    <a
+                      href="javascript:void(0)"
+                      @click="showLeetCodeID = true"
+                    >修改LeetCodeID</a>
                   </p>
                   
                 </li>
@@ -136,6 +149,33 @@
         </div>
       </template>
     </el-dialog>
+    <el-dialog
+      v-model="showLeetCodeID"
+      title="修改LeetCodeID"
+      width="360px"
+      @close="clearLeetCodeID"
+    >
+      <el-form
+        ref="modifyPwdForm"
+        :model="pwdModify"
+        label-width="80px"
+      >
+      <el-form-item :minlength="10" label="请输入新的LeetCodeID" prop="newLeetCodeID">
+          <el-input v-model="newLeetCodeID"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            @click="showLeetCodeID = false"
+          >取 消</el-button>
+          <el-button
+            type="primary"
+            @click="saveLeetCodeID"
+          >确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -151,6 +191,7 @@ import { reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/pinia/modules/user'
 import SelectImage from '@/components/selectImage/selectImage.vue'
+import WarningBar from '@/components/warningBar/warningBar.vue'
 
 const activeName = ref('second')
 const rules = reactive({
@@ -184,6 +225,32 @@ const showPassword = ref(false)
 const pwdModify = ref({})
 const nickName = ref('')
 const editFlag = ref(false)
+
+const showLeetCodeID = ref(false)
+const newLeetCodeID = ref("")
+
+const saveLeetCodeID = async() => {
+
+  if(newLeetCodeID.value === "") {
+    ElMessage.error("LeetCodeID不能为空")
+    return false
+  }
+
+  const res = await setSelfInfo({
+    lc_name: newLeetCodeID.value
+  })
+  if(res.code === 0) {
+    ElMessage.success("LeetCodeID修改成功")
+  }
+  showLeetCodeID.value = false
+  userStore.userInfo.lc_name = newLeetCodeID.value
+  saveLeetCodeID.value = ""
+  
+}
+const clearLeetCodeID = () => {
+  newLeetCodeID.value = ""
+}
+
 const savePassword = async() => {
   modifyPwdForm.value.validate((valid) => {
     if (valid) {

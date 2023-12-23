@@ -26,7 +26,7 @@
         <el-table-column 
           sortable="custom" align="center" label="本月打卡天数" min-width="100" prop="da_count_in_mouth" />
           <el-table-column 
-          sortable="custom" align="center" label="累计打卡次数" min-width="100" prop="da_count_all" />
+          sortable="custom" align="center" label="累计打卡天数" min-width="100" prop="da_count_all" />
           <el-table-column 
           sortable="custom" align="center" label="LC竞赛分数" min-width="100" prop="lc_rate" />
         </el-table>
