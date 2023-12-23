@@ -28,7 +28,6 @@ services:
       MYSQL_PASSWORD: '123456'
     volumes: 
       - ./initSQL:/docker-entrypoint-initdb.d   # 把这个目录挂载到mysql中/docker-entrypoint-initdb.d/，该路径下容器启动时自动执行sql文件，用于初始化数据库。
-      # 为什么没用？？？因为上面的MYSQL_USER环境变量（我起的是root）和root管理员重名了，因为用户产生了错误，所以没办法在mysql中调用sql文件。初始化数据库的目录是通过下面这个用户来执行的，所以没办法执行！！！
       - mysql:/var/lib/mysql
 
     networks:

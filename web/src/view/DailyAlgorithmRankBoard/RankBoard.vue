@@ -2,7 +2,10 @@
   <div>
     <warning-bar title="注：默认按照打卡次数排序，总用户数前20%（上取整）的用户标✨" />
     <div class="gva-table-box">
-      <el-table :data="tableData">
+      <el-table 
+      :data="tableData"
+      @sort-change="sortChange"
+      >
         <el-table-column type="index" align="center" :resizable="false" label="排名" width="100">
           <template #default="scope">
             <div :class="getRankClass(scope.$index)">
@@ -19,9 +22,14 @@
             <CustomPic style="margin-top:8px" :pic-src="scope.row.headerImg" />
           </template>
         </el-table-column>
-        <el-table-column align="center" label="昵称" min-width="150" prop="nickName" />
-        <el-table-column align="center" label="本月打卡天数" min-width="180" prop="da_count_in_mouth" />
-      </el-table>
+        <el-table-column align="center" label="昵称" min-width="75" prop="nickName" />
+        <el-table-column 
+          sortable="custom" align="center" label="本月打卡天数" min-width="100" prop="da_count_in_mouth" />
+          <el-table-column 
+          sortable="custom" align="center" label="累计打卡次数" min-width="100" prop="da_count_all" />
+          <el-table-column 
+          sortable="custom" align="center" label="LC竞赛分数" min-width="100" prop="lc_rate" />
+        </el-table>
       <div class="gva-pagination">
         <el-pagination :current-page="page" :page-size="pageSize" :page-sizes="[10, 30, 50, 100]" :total="total"
           layout="total, sizes, prev, pager, next, jumper" @current-change="handleCurrentChange"
@@ -40,7 +48,7 @@
 <script setup>
 
 import {
-  getUserList,
+  getUserListBySort,
 } from '@/api/user'
 
 import { getAuthorityList } from '@/api/authority'
@@ -48,8 +56,6 @@ import CustomPic from '@/components/customPic/index.vue'
 import WarningBar from '@/components/warningBar/warningBar.vue'
 
 import { ref, watch } from 'vue'
-
-const path = ref(import.meta.env.VITE_BASE_API + '/')
 // 初始化相关
 const setAuthorityOptions = (AuthorityData, optionsData) => {
   AuthorityData &&
@@ -77,6 +83,8 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const limitSize = ref(0)
+const sort_key = ref("")
+const sort_order = ref(0)
 // 分页
 const handleSizeChange = (val) => {
   pageSize.value = val
@@ -91,7 +99,7 @@ const handleCurrentChange = (val) => {
 // console.log(tableData)
 // 查询
 const getTableData = async () => {
-  const table = await getUserList({ page: page.value, pageSize: pageSize.value })
+  const table = await getUserListBySort({ page: page.value, pageSize: pageSize.value, sort_key: sort_key.value, sort_order: sort_order.value })
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -144,7 +152,16 @@ const setOptions = (authData) => {
   setAuthorityOptions(authData, authOptions.value)
 }
 
-
+const sortChange = (column) => {
+  sort_key.value = column.prop
+  if(column.order === 'ascending'){
+    sort_order.value = 0
+  }else if(column.order === 'descending'){
+    sort_order.value = 1
+  }
+  
+  getTableData()
+}
 
 </script>
 <style lang="scss">

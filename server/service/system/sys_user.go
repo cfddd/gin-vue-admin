@@ -78,7 +78,7 @@ func (userService *UserService) ChangePassword(u *system.SysUser, newPassword st
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetUserInfoList
-//@description: 分页获取数据,按照da_count_in_mouth 降序排序
+//@description: 分页获取数据
 //@param: info request.PageInfo
 //@return: err error, list interface{}, total int64
 
@@ -91,7 +91,33 @@ func (userService *UserService) GetUserInfoList(info request.PageInfo) (list int
 	if err != nil {
 		return
 	}
-	err = db.Order("da_count_in_mouth desc").Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
+	err = db.Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
+	return userList, total, err
+}
+
+//@author: [piexlmax](https://github.com/piexlmax)
+//@function: GetUserInfoList
+//@description: 分页获取数据,使用一定的排序规则
+//@param: info request.PageInfo
+//@return: err error, list interface{}, total int64
+
+func (userService *UserService) GetUserOrderInfoList(info request.SortPageInfo) (list interface{}, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+	db := global.GVA_DB.Model(&system.SysUser{})
+
+	var orderRule string
+	if info.SortOrder == 1 {
+		orderRule = info.SortKey + " desc"
+	} else {
+		orderRule = info.SortKey
+	}
+	var userList []system.SysUser
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+	err = db.Order(orderRule).Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
 	return userList, total, err
 }
 
@@ -247,13 +273,33 @@ func (userService *UserService) ResetPassword(ID uint) (err error) {
 }
 
 //@author: [cfd](https://github.com/cfddd)
+//@function: AddDACountALL
+//@description: 每日打卡记录+1，找到uuid等于user_name参数的行，给该行的da_count_all
+//@param: user_name string
+//@return: err error
+
+func AddDACountALL(user_name string) (err error) {
+	return global.GVA_DB.Model(&system.SysUser{}).Where("uuid = ?", user_name).Update("da_count_all", gorm.Expr("da_count_all + ?", 1)).Error
+}
+
+//@author: [cfd](https://github.com/cfddd)
 //@function: AddDACount
 //@description: 每日打卡记录+1，找到uuid等于user_name参数的行，给该行的da_count_in_mouth+1
 //@param: user_name string
 //@return: err error
 
 func AddDACount(user_name string) (err error) {
-	return global.GVA_DB.Model(&system.SysUser{}).Where("uuid = ?", user_name).Update("da_count_in_mouth", gorm.Expr("da_count_in_mouth + ?", 1)).Error
+	tx := global.GVA_DB.Begin() // 开启事务
+	err = AddDACountALL(user_name)
+	if err != nil {
+		tx.Rollback() // 操作失败回滚事务
+	}
+	err = global.GVA_DB.Model(&system.SysUser{}).Where("uuid = ?", user_name).Update("da_count_in_mouth", gorm.Expr("da_count_in_mouth + ?", 1)).Error
+	if err != nil {
+		tx.Rollback() // 操作失败，回滚事务
+	}
+	err = tx.Commit().Error // 提交事务
+	return
 }
 
 //@author: [cfd](https://github.com/cfddd)
@@ -282,6 +328,6 @@ func CoverDACount(user_name string, x int) (err error) {
 //@return: err error, list []string
 
 func GetUserUuidList() (list []string, err error) {
-	err = global.GVA_DB.Model(&system.SysUser{}).Select("uuid").Find(&list).Error
+	err = global.GVA_DB.Model(&system.SysUser{}).Where("uuid is not NUll").Select("uuid").Find(&list).Error
 	return
 }

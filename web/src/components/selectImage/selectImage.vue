@@ -38,7 +38,7 @@
 
   <el-drawer v-model="drawer" title="媒体库" size="650px">
     <warning-bar
-      title="点击“文件名/备注”可以编辑文件名或者备注内容。"
+      title="点击“文件名/备注”可以编辑文件名或者备注内容，非管理员无法上传文件。"
     />
     <div class="gva-btn-list">
       <upload-common

@@ -64,6 +64,22 @@ export const getUserList = (data) => {
 }
 
 // @Tags User
+// @Summary 分页获取用户列表,并按照规则排序
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body modelInterface.PageInfo true "分页获取用户列表"
+// @Success 200 {string} json "{"success":true,"data":{},"msg":"获取成功"}"
+// @Router /user/getUserListBySort [post]
+export const getUserListBySort = (data) => {
+  return service({
+    url: '/user/getUserListBySort',
+    method: 'post',
+    data: data
+  })
+}
+
+// @Tags User
 // @Summary 设置用户权限
 // @Security ApiKeyAuth
 // @accept application/json

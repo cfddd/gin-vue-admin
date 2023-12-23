@@ -6,7 +6,7 @@ import (
 	DailyAlgorithmReq "github.com/flipped-aurora/gin-vue-admin/server/model/DailyAlgorithm/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
-	"log"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func (DARService *DailyAlgorithmRecordService) CreateDailyAlgorithmRecord(DAR *D
 
 	if err != nil {
 		tx.Rollback() // 操作失败，回滚事务
-		log.Fatal(err)
+		global.GVA_LOG.Error("创建失败!", zap.Error(err))
 	}
 	err = tx.Commit().Error // 提交事务
 

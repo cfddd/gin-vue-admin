@@ -105,7 +105,8 @@ mssql:
     log-mode: ""
     log-zap: false
 mysql:
-    path: "177.7.0.13"
+#    path: "177.7.0.13"
+    path: "127.0.0.1"
     port: "3306"
     config: "charset=utf8mb4&parseTime=True&loc=Local"
     db-name: "gva"
@@ -177,8 +178,8 @@ system:
     addr: 8888
     db-type: mysql
     oss-type: local
-    use-multipoint: false
-    use-redis: false
+    use-multipoint: true
+    use-redis: true
     iplimit-count: 15000
     iplimit-time: 3600
     router-prefix: ""

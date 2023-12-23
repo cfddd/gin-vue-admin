@@ -285,3 +285,8 @@ docker rm gva-mysql
 docker volume rm docker-compose_mysql
 docker-compose -f deploy/docker-compose/docker-compose.yaml up --build -d
 ```
+## 排行榜更新
+可以选择排序的类别
+以及一些大大小小的逻辑优化
+
+和前面的每日打卡排行榜类似，使用数据库进行排序（数据量小）

@@ -1,11 +1,9 @@
 package DailyAlgorithm
 
 import (
-	"fmt"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/DailyAlgorithm"
 	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
-	"github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
 	"time"
 )
 
@@ -14,17 +12,12 @@ import (
 // 关于在定时器中调用，因为是多线程，就要考虑对数据库写入的互斥操作
 // 所以下面两个函数必须在对数据库写入时
 // 使用读写锁，仅在写入时互斥
-//
-// 当时只有新开辟的线程会使用这个函数，互斥应该在数据库层面上的互斥
-// 这里互斥没有用
 
 func CountDailyAlgorithmRank() (err error) {
 
 	// 定义一个键值对数组，用于存储该月用户的打卡天数
 	rank := make(map[string]int)
 
-	// 就算是打卡次数为0，也需要记录一下，为下面rank的map可以更新到所有用户
-	// 所以要再遍历一遍所有用户，先加入map中
 	var uuidList []string
 	uuidList, err = system.GetUserUuidList()
 	if err != nil {
@@ -36,13 +29,10 @@ func CountDailyAlgorithmRank() (err error) {
 
 	// 获取当前日期
 	now := time.Now()
-
 	// 循环遍历过去30天的日期
-
 	for i := 0; i < 30; i++ {
 		// 计算当前日期的字符串表示
 		date := now.AddDate(0, 0, -i).Format("2006-01-02")
-		fmt.Println(date)
 		// 创建db
 		// 在这里是因为循环导包
 
@@ -70,7 +60,6 @@ func CountDailyAlgorithmRank() (err error) {
 	}
 
 	for name, cnt := range rank {
-		fmt.Println(name, cnt)
 		system.CoverDACount(name, cnt)
 	}
 
@@ -111,10 +100,12 @@ func RemoveCountedOutDate() (err error) {
 }
 
 // Timer
-// sb代码，在docker中莫名其妙用不了，改用别人写好的函数
+// 每个月定时更新打卡次数的代码
+// 全部都是使用数据库查询操作
+// 需要更新 todo
 func Timer() (err error) {
 
-	//每次运行，调用一次更新30天内的函数，保证数据的可维护性
+	//每次运行，调用一次更新30天内的函数，保证数据的完整性
 	err = CountDailyAlgorithmRank()
 	if err != nil {
 		global.GVA_LOG.Error("DACount Error")
@@ -122,10 +113,8 @@ func Timer() (err error) {
 	}
 	global.GVA_LOG.Info("DACount Counted")
 
-	//corn框架中的定时器
-	t := timer.NewTimerTask()
-
-	_, err = t.AddTaskByFunc("DAFunc", "@midnight", func() {
+	//@midnight
+	_, err = global.GVA_Timer.AddTaskByFunc("DAFunc", "@midnight", func() {
 		err := RemoveCountedOutDate()
 		if err != nil {
 			global.GVA_LOG.Error("process counted work occur to error ,recalculate")

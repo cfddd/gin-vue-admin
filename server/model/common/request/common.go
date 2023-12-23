@@ -7,6 +7,13 @@ type PageInfo struct {
 	Keyword  string `json:"keyword" form:"keyword"`   //关键字
 }
 
+// SortPageInfo Paging common input parameter structure and sort info
+type SortPageInfo struct {
+	PageInfo
+	SortKey   string `json:"sort_key"`
+	SortOrder int    `json:"sort_order"`
+}
+
 // GetById Find by id structure
 type GetById struct {
 	ID int `json:"id" form:"id"` // 主键ID

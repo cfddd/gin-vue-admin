@@ -47,9 +47,10 @@ func (b *BaseApi) Login(c *gin.Context) {
 		global.BlackCache.Set(key, 1, time.Second*time.Duration(openCaptchaTimeOut))
 	}
 
-	var oc bool = openCaptcha == 0 || openCaptcha < interfaceToInt(v)
+	// 是否需要验证码
+	var oc = openCaptcha != 0 && openCaptcha >= v.(int)
 
-	if !oc || store.Verify(l.CaptchaId, l.Captcha, true) {
+	if oc || store.Verify(l.CaptchaId, l.Captcha, true) {
 		u := &system.SysUser{Username: l.Username, Password: l.Password}
 		user, err := userService.Login(u)
 		if err != nil {
@@ -236,6 +237,43 @@ func (b *BaseApi) GetUserList(c *gin.Context) {
 		Total:    total,
 		Page:     pageInfo.Page,
 		PageSize: pageInfo.PageSize,
+	}, "获取成功", c)
+}
+
+// getUserListBySort
+// @Tags      SysUser
+// @Summary   分页获取用户列表,通过规则排序
+// @Security  ApiKeyAuth
+// @accept    application/json
+// @Produce   application/json
+// @Param     data  body      request.PageInfo                                        true  "页码, 每页大小"
+// @Success   200   {object}  response.Response{data=response.PageResult,msg=string}  "分页获取用户列表,返回包括列表,总数,页码,每页数量"
+// @Router    /user/getUserList [post]
+
+func (b *BaseApi) GetUserListBySort(c *gin.Context) {
+	var sortPageInfo request.SortPageInfo
+	err := c.ShouldBindJSON(&sortPageInfo)
+
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	err = utils.Verify(sortPageInfo, utils.PageInfoVerify)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	list, total, err := userService.GetUserOrderInfoList(sortPageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+		return
+	}
+	response.OkWithDetailed(response.PageResult{
+		List:     list,
+		Total:    total,
+		Page:     sortPageInfo.Page,
+		PageSize: sortPageInfo.PageSize,
 	}, "获取成功", c)
 }
 

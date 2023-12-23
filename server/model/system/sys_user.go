@@ -23,6 +23,9 @@ type SysUser struct {
 	QQ             string         `json:"qq" gorm:"comment:用户QQ"`                            //用户QQ
 	Enable         int            `json:"enable" gorm:"default:1;comment:用户是否被冻结 1正常 2冻结"`   //用户是否被冻结 1正常 2冻结
 	DACountInMouth int            `json:"da_count_in_mouth" gorm:"default:0;comment:本月打卡次数"` // 本月内打卡次数
+	DACountAll     int            `json:"da_count_all" gorm:"default:0;comment:累计打卡次数"`      // 累计打卡次数
+	LcRate         int            `json:"lc_rate" gorm:"default:0;comment:本月打卡率"`            // 力扣竞赛分数
+	LcName         string         `json:"lc_name" gorm:"comment:力扣ID"`                       // 力扣ID
 }
 
 func (SysUser) TableName() string {

@@ -36,8 +36,8 @@ func RunWindowsServer() {
 	time.Sleep(10 * time.Microsecond)
 	global.GVA_LOG.Info("server run success on ", zap.String("address", address))
 
-	//每日一题排行榜每日更新
-	DailyAlgorithm.Timer()
+	//每日一题排行榜每日更新定时器，刚启动项目时运行一次
+	go DailyAlgorithm.Timer()
 
 	fmt.Printf(`
 	欢迎使用 gin-vue-admin
