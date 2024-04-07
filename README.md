@@ -1,383 +1,310 @@
+## 项目内容
+### 1.测试自动化包部署
+[docker部署](README-Docker.md)
 
-<div align=center>
-<img src="http://qmplusimg.henrongyi.top/gvalogo.jpg" width=300" height="300" />
-</div>
-<div align=center>
-<img src="https://img.shields.io/badge/golang-1.18-blue"/>
-<img src="https://img.shields.io/badge/gin-1.1.1-lightBlue"/>
-<img src="https://img.shields.io/badge/vue-3.3.4-brightgreen"/>
-<img src="https://img.shields.io/badge/element--plus-2.3.8-green"/>
-<img src="https://img.shields.io/badge/gorm-1.25.2-red"/>
-</div>
+### 2.每日算法打卡菜单
+写了一个前端界面，以下简称DA
 
-[English](./README-en.md) | 简体中文
+#### 每日打卡
+- 前端的css
+- vue组件的再利用，把原本弹出的的form提交窗口栏，变成了确认窗口，但是没有改变原有的提交数据的逻辑
 
-## 不同版本
+#### 本月打卡日历
+- 用gpt生成了一个日历，但是不太方便使用，暂时搁置
 
-我们会对以下四个版本持续维护，请选择适合自己的版本使用。最新技术栈为组合式api版本，已支持多语言（I18N）
+### 3.排行榜
+目的很简单，根据打卡次数排序，做一个榜单，在“用户管理”菜单的基础之上制作。
 
-[组合式API版（主）](https://github.com/flipped-aurora/gin-vue-admin) | 
-[组合式API多语言(i18n)版](https://github.com/flipped-aurora/gin-vue-admin/tree/i18n-dev-new) | 
-[声明式API版](https://github.com/flipped-aurora/gin-vue-admin/tree/v2.4.x) | 
-[声明式API多语言(i18n)版](https://github.com/flipped-aurora/gin-vue-admin/tree/i18n-dev)
+后续还可以根据用户提供的刷题网站（例如LeetCode，codefores，acwing等）用户名，爬取刷题量，竞赛rating等信息排序
 
-# 项目文档
-[在线文档](https://www.gin-vue-admin.com) : https://www.gin-vue-admin.com
+#### 准备环节
+把user.vue中的内容完全拷贝到src\view\DailyAlgorithmRankBoard\RankBoard.vue
 
-[初始化](https://www.gin-vue-admin.com/guide/start-quickly/initialization.html)
-						       
-[从环境到部署教学视频](https://www.bilibili.com/video/BV1Rg411u7xH)
+稍稍出手修改前端界面的内容更像一个排行榜
 
-[开发教学](https://www.gin-vue-admin.com/guide/start-quickly/env.html) (贡献者:  <a href="https://github.com/LLemonGreen">LLemonGreen</a> And <a href="https://github.com/fkk0509">Fann</a>)
+修改结构体和相关api，（貌似数据库的列信息会自动创建后加上的列，省了）
+- server/api/v1/system/sys_user.go
+- server/model/system/request/sys_operation_record.go
+- server/model/system/sys_user.go
+- server/service/system/sys_user.go
+添加了一个QQ号码类型
 
-[交流社区](https://support.qq.com/products/371961)
+成功在前端中显示，并且可以通过前端发送给后端消息，修改数据库中的内容
 
-[插件市场](https://plugin.gin-vue-admin.com/)
+#### 统计打卡
+在前端页面中中加上了一个打卡次数的列
 
-# 重要提示
+和上面的内容类似，但是需要统计打卡次数并且做出修改
 
-1.本项目从起步到开发到部署均有文档和详细视频教程
+完全交给后端来操作，每天24点调用函数countDailyAlgorithmRank，统计打卡次数，直接更新数据库，免去了前端操作
 
-2.本项目需要您有一定的golang和vue基础
+- 函数countDailyAlgorithmRank的功能为
+- 在dailyalgorithmrecord表中有user_name和date两个字段，统计user_name在30天内的打卡次数，返回一个键值对数组`map[string]int`，每天的打卡最多计算一次
+- 先遍历从今天开始的三十天？？？感觉有更好的办法！
+- 在有人提交记录时，就给该用户今天的打卡次数+1，直接更新数据库中的数据
+- 每天只需要排除第31天之前的所有数据
+- 成功优化了查询效率！！！
+- 但是为了更具有鲁棒性，之前的函数可以保留，在出现错误时重新调用，可以保证排行榜的正确性
 
-3.您完全可以通过我们的教程和文档完成一切操作，因此我们不再提供免费的技术服务，如需服务请进行[付费支持](https://www.gin-vue-admin.com/coffee/payment.html)
+#### 原本数据库date
+原本每日打卡记录表中date使用的是datetime类型，包含了时分秒，对数据库的效率有影响
 
-4.如果您将此项目用于商业用途，请遵守Apache2.0协议并保留作者技术支持声明。您需保留如下版权声明信息，其余信息功能不做任何限制。如需剔除请[购买授权](https://www.gin-vue-admin.com/empower/index.html)
+而且不方便更新记录，同一天的打卡记录会被覆盖，包含了时分秒需要特殊判断一下
 
-<img src="https://qmplusimg.henrongyi.top/%E6%8E%88%E6%9D%83.png" width="1000">
+还有就是数据库中已经自动创建了一个记录创建时间里，date的意义不大
 
-## 1. 基本介绍
+所以就修改了数据库中的date的类型为date，原本date.Time类型也可以自动兼容
 
-### 1.1 项目介绍
+为了实现代码的覆盖，需要在路由方面再写一个coverDailyAlgorithmRecord函数，在每次判断edit还是create前调用
 
-> Gin-vue-admin是一个基于 [vue](https://vuejs.org) 和 [gin](https://gin-gonic.com) 开发的全栈前后端分离的开发基础平台，集成jwt鉴权，动态路由，动态菜单，casbin鉴权，表单生成器，代码生成器等功能，提供多种示例文件，让您把更多时间专注在业务开发上。
+#### 前端后端消息传递和调用
+**前端**
+```vue
+  const resCoverRecord = await coverDailyAlgorithmRecord({ date:formData.value.date })
+  if (resCoverRecord.code === 0) {
+    formData.value = resCoverRecord.data.reDAR
+    type.value = 'update'
+  }
+  // console.log(type.value)
 
-[在线预览](http://demo.gin-vue-admin.com): http://demo.gin-vue-admin.com
-
-测试用户名：admin
-
-测试密码：123456
-
-### 1.2 贡献指南
-Hi! 首先感谢你使用 gin-vue-admin。
-
-Gin-vue-admin 是一套为快速研发准备的一整套前后端分离架构式的开源框架，旨在快速搭建中小型项目。
-
-Gin-vue-admin 的成长离不开大家的支持，如果你愿意为 gin-vue-admin 贡献代码或提供建议，请阅读以下内容。
-
-#### 1.2.1 Issue 规范
-- issue 仅用于提交 Bug 或 Feature 以及设计相关的内容，其它内容可能会被直接关闭。
-									      
-- 在提交 issue 之前，请搜索相关内容是否已被提出。
-
-#### 1.2.2 Pull Request 规范
-- 请先 fork 一份到自己的项目下，不要直接在仓库下建分支。
-
-- commit 信息要以`[文件名]: 描述信息` 的形式填写，例如 `README.md: fix xxx bug`。
-
-- 如果是修复 bug，请在 PR 中给出描述信息。
-
-- 合并代码需要两名维护人员参与：一人进行 review 后 approve，另一人再次 review，通过后即可合并。
-
-## 2. 使用说明
 
 ```
-- node版本 > v16.8.3
-- golang版本 >= v1.16
-- IDE推荐：Goland
+在save保存按钮前加上上面这一段代码，以更新type.value，改变数据的格式
+
+调用了coverDailyAlgorithmRecord函数api，花括号内是json格式的数据
+
+在这个示例中，await 关键字用于等待 coverDailyAlgorithmRecord 函数返回一个 Promise 对象的结果。这意味着在接收到结果之前，代码将暂停执行，并等待 Promise 对象的解决（即成功或失败）。
+
+要特别注意的是，前端还设置了一个api调用的权限，需要设置这个api调用的权限
+
+**后端**
+```go
+// CoverDailyAlgorithmRecord 用date查询DailyAlgorithmRecord
+// @Tags DailyAlgorithmRecord
+// @Summary  用date查询DailyAlgorithmRecord
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query DailyAlgorithm.DailyAlgorithmRecord true "用date查询DailyAlgorithmRecord"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Router /DAR/findDailyAlgorithmRecord [get]
+func (DARApi *DailyAlgorithmRecordApi) CoverDailyAlgorithmRecord(c *gin.Context) {
+	var DAR DailyAlgorithm.DailyAlgorithmRecord
+	err := c.ShouldBindQuery(&DAR)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	if reDAR, err := DARService.GetCoverDailyAlgorithmRecord(*(DAR.Date)); err != nil {
+		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		response.FailWithMessage("查询失败", c)
+	} else {
+		response.OkWithData(gin.H{"reDAR": reDAR}, c)
+	}
+}
+```
+这是一个用gin写的api，功能是用date查询DailyAlgorithmRecord数据表，和findDailyAlgorithmRecord非常类似
+
+`ShouldBindQuery`函数用于将请求参数解析到结构体中
+
+将调用下面的函数`GetCoverDailyAlgorithmRecord`，用gorm在数据库中查询
+```go
+// GetCoverDailyAlgorithmRecord 根据date获取DailyAlgorithmRecord记录
+// Author [CFDDFC](https://github.com/cfddd)
+func (DARService *DailyAlgorithmRecordService) GetCoverDailyAlgorithmRecord(date time.Time) (DAR DailyAlgorithm.DailyAlgorithmRecord, err error) {
+	dateString := date.Format("2006-01-02")
+
+	err = global.GVA_DB.Where("date = ?", dateString).First(&DAR).Error
+	return
+}
 ```
 
-### 2.1 server项目
+完成之后通过`response`返回给前端调用
 
-使用 `Goland` 等编辑工具，打开server目录，不可以打开 gin-vue-admin 根目录
+#### 对于修改操作
+在执行update之前，需要先find
+find找到后，会给formData赋值，并且type赋值为update
+接下来的updata操作只传递了需要更新的字段，有点不解
+去后台看源码，发现gorm调用的save函数是自动根据根据primary字段查找的
+找到则更新,没找到则创建
 
-```bash
-
-# 克隆项目
-git clone https://github.com/flipped-aurora/gin-vue-admin.git
-# 进入server文件夹
-cd server
-
-# 使用 go mod 并安装go依赖包
-go generate
-
-# 编译 
-go build -o server main.go (windows编译命令为go build -o server.exe main.go )
-
-# 运行二进制
-./server (windows运行命令为 server.exe)
+## 关于如何批量增加用户
+因为注册用户在逻辑上不太易于实现，且实际作用不大，于是选择做一个批量导入用户的功能
 ```
-
-### 2.2 web项目
-
-```bash
-# 进入web文件夹
-cd web
-
-# 安装依赖
-npm install
-
-# 启动web项目
-npm run serve
+LOCK TABLES `sys_users` WRITE;
+/*!40000 ALTER TABLE `sys_users` DISABLE KEYS */;
+INSERT INTO `sys_users` VALUES (2,'2023-08-05 16:52:03.971','2023-10-03 12:40:35.389',NULL,'c51eb03c-62e0-4d16-bd8d-d8cbef3f4487','a303176530','$2a$10$RvLUU4mPpXwYiscWyl/INu.UanzclFMqDdTy8OR.tWDl5aroxrx0.','用户1','dark','https://qmplusimg.henrongyi.top/1576554439myAvatar.png','#fff','#1890ff',1,'17611111111','333333@qq.com',1,'29090',0);
+/*!40000 ALTER TABLE `sys_users` ENABLE KEYS */;
+UNLOCK TABLES;
 ```
-
-### 2.3 swagger自动化API文档
-
-#### 2.3.1 安装 swagger
-
-##### （1）可以访问外国网站
-
-````
-go get -u github.com/swaggo/swag/cmd/swag
-````
-
-##### （2）无法访问外国网站
-
-由于国内没法安装 go.org/x 包下面的东西，推荐使用 [goproxy.cn](https://goproxy.cn) 或者 [goproxy.io](https://goproxy.io/zh/)
-
-```bash
-# 如果您使用的 Go 版本是 1.13 - 1.15 需要手动设置GO111MODULE=on, 开启方式如下命令, 如果你的 Go 版本 是 1.16 ~ 最新版 可以忽略以下步骤一
-# 步骤一、启用 Go Modules 功能
-go env -w GO111MODULE=on 
-# 步骤二、配置 GOPROXY 环境变量
-go env -w GOPROXY=https://goproxy.cn,https://goproxy.io,direct
-
-# 如果嫌弃麻烦,可以使用go generate 编译前自动执行代码, 不过这个不能使用 `Goland` 或者 `Vscode` 的 命令行终端
-cd server
-go generate -run "go env -w .*?"
-
-# 使用如下命令下载swag
-go get -u github.com/swaggo/swag/cmd/swag
-```
-
-#### 2.3.2 生成API文档
-
-```` shell
-cd server
-swag init
-````
-
-> 执行上面的命令后，server目录下会出现docs文件夹里的 `docs.go`, `swagger.json`, `swagger.yaml` 三个文件更新，启动go服务之后, 在浏览器输入 [http://localhost:8888/swagger/index.html](http://localhost:8888/swagger/index.html) 即可查看swagger文档
-
-### 2.4 VSCode工作区
-
-#### 2.4.1 开发
-
-使用`VSCode`打开根目录下的工作区文件`gin-vue-admin.code-workspace`，在边栏可以看到三个虚拟目录：`backend`、`frontend`、`root`。
-
-#### 2.4.2 运行/调试
-
-在运行和调试中也可以看到三个task：`Backend`、`Frontend`、`Both (Backend & Frontend)`。运行`Both (Backend & Frontend)`可以同时启动前后端项目。
-
-#### 2.4.3 settings
-
-在工作区配置文件中有`go.toolsEnvVars`字段，是用于`VSCode`自身的go工具环境变量。此外在多go版本的系统中，可以通过`gopath`、`go.goroot`指定运行版本。
-
-```json
-    "go.gopath": null,
-    "go.goroot": null,
-```
-
-## 3. 技术选型
-
-- 前端：用基于 [Vue](https://vuejs.org) 的 [Element](https://github.com/ElemeFE/element) 构建基础页面。
-- 后端：用 [Gin](https://gin-gonic.com/) 快速搭建基础restful风格API，[Gin](https://gin-gonic.com/) 是一个go语言编写的Web框架。
-- 数据库：采用`MySql` > (5.7) 版本 数据库引擎 InnoDB，使用 [gorm](http://gorm.cn) 实现对数据库的基本操作。
-- 缓存：使用`Redis`实现记录当前活跃用户的`jwt`令牌并实现多点登录限制。
-- API文档：使用`Swagger`构建自动化文档。
-- 配置文件：使用 [fsnotify](https://github.com/fsnotify/fsnotify) 和 [viper](https://github.com/spf13/viper) 实现`yaml`格式的配置文件。
-- 日志：使用 [zap](https://github.com/uber-go/zap) 实现日志记录。
-
-## 4. 项目架构
-
-### 4.1 系统架构图
-
-![系统架构图](http://qmplusimg.henrongyi.top/gva/gin-vue-admin.png)
-
-### 4.2 前端详细设计图 （提供者:<a href="https://github.com/baobeisuper">baobeisuper</a>）
-
-![前端详细设计图](http://qmplusimg.henrongyi.top/naotu.png)
-
-### 4.3 目录结构
+上面是一个普通用户的sql语句
+先加上事务锁住表，然后再添加语句
+id为主键，可以忽略
+创建时间和更新时间可以是现在的时间
+删除时间为NULL
+uuid需要特别注意，使用代码生成
+username输入
+password加密初始密码123456
+nickname和username相同
+sidemode为'dark'
+header_img为'https://qmplusimg.henrongyi.top/1576554439myAvatar.png'
+后面全部和上面的sql语句相同
 
 ```
-    ├── server
-        ├── api             (api层)
-        │   └── v1          (v1版本接口)
-        ├── config          (配置包)
-        ├── core            (核心文件)
-        ├── docs            (swagger文档目录)
-        ├── global          (全局对象)                    
-        ├── initialize      (初始化)                        
-        │   └── internal    (初始化内部函数)                            
-        ├── middleware      (中间件层)                        
-        ├── model           (模型层)                    
-        │   ├── request     (入参结构体)                        
-        │   └── response    (出参结构体)                            
-        ├── packfile        (静态文件打包)                        
-        ├── resource        (静态资源文件夹)                        
-        │   ├── excel       (excel导入导出默认路径)                        
-        │   ├── page        (表单生成器)                        
-        │   └── template    (模板)                            
-        ├── router          (路由层)                    
-        ├── service         (service层)                    
-        ├── source          (source层)                    
-        └── utils           (工具包)                    
-            ├── timer       (定时器接口封装)                        
-            └── upload      (oss接口封装)                        
-    
-            web
-        ├── babel.config.js
-        ├── Dockerfile
-        ├── favicon.ico
-        ├── index.html                 -- 主页面
-        ├── limit.js                   -- 助手代码
-        ├── package.json               -- 包管理器代码
-        ├── src                        -- 源代码
-        │   ├── api                    -- api 组
-        │   ├── App.vue                -- 主页面
-        │   ├── assets                 -- 静态资源
-        │   ├── components             -- 全局组件
-        │   ├── core                   -- gva 组件包
-        │   │   ├── config.js          -- gva网站配置文件
-        │   │   ├── gin-vue-admin.js   -- 注册欢迎文件
-        │   │   └── global.js          -- 统一导入文件
-        │   ├── directive              -- v-auth 注册文件
-        │   ├── main.js                -- 主文件
-        │   ├── permission.js          -- 路由中间件
-        │   ├── pinia                  -- pinia 状态管理器，取代vuex
-        │   │   ├── index.js           -- 入口文件
-        │   │   └── modules            -- modules
-        │   │       ├── dictionary.js
-        │   │       ├── router.js
-        │   │       └── user.js
-        │   ├── router                 -- 路由声明文件
-        │   │   └── index.js
-        │   ├── style                  -- 全局样式
-        │   │   ├── base.scss
-        │   │   ├── basics.scss
-        │   │   ├── element_visiable.scss  -- 此处可以全局覆盖 element-plus 样式
-        │   │   ├── iconfont.css           -- 顶部几个icon的样式文件
-        │   │   ├── main.scss
-        │   │   ├── mobile.scss
-        │   │   └── newLogin.scss
-        │   ├── utils                  -- 方法包库
-        │   │   ├── asyncRouter.js     -- 动态路由相关
-        │   │   ├── btnAuth.js         -- 动态权限按钮相关
-        │   │   ├── bus.js             -- 全局mitt声明文件
-        │   │   ├── date.js            -- 日期相关
-        │   │   ├── dictionary.js      -- 获取字典方法 
-        │   │   ├── downloadImg.js     -- 下载图片方法
-        │   │   ├── format.js          -- 格式整理相关
-        │   │   ├── image.js           -- 图片相关方法
-        │   │   ├── page.js            -- 设置页面标题
-        │   │   ├── request.js         -- 请求
-        │   │   └── stringFun.js       -- 字符串文件
-        |   ├── view -- 主要view代码
-        |   |   ├── about -- 关于我们
-        |   |   ├── dashboard -- 面板
-        |   |   ├── error -- 错误
-        |   |   ├── example --上传案例
-        |   |   ├── iconList -- icon列表
-        |   |   ├── init -- 初始化数据  
-        |   |   |   ├── index -- 新版本
-        |   |   |   ├── init -- 旧版本
-        |   |   ├── layout  --  layout约束页面 
-        |   |   |   ├── aside 
-        |   |   |   ├── bottomInfo     -- bottomInfo
-        |   |   |   ├── screenfull     -- 全屏设置
-        |   |   |   ├── setting        -- 系统设置
-        |   |   |   └── index.vue      -- base 约束
-        |   |   ├── login              --登录 
-        |   |   ├── person             --个人中心 
-        |   |   ├── superAdmin         -- 超级管理员操作
-        |   |   ├── system             -- 系统检测页面
-        |   |   ├── systemTools        -- 系统配置相关页面
-        |   |   └── routerHolder.vue   -- page 入口页面 
-        ├── vite.config.js             -- vite 配置文件
-        └── yarn.lock
+#// Register User register structure
+#type Register struct {
+#	Username     string `json:"userName" example:"用户名"`
+#	Password     string `json:"passWord" example:"密码"`
+#	NickName     string `json:"nickName" example:"昵称"`
+#	HeaderImg    string `json:"headerImg" example:"头像链接"`
+#	AuthorityId  uint   `json:"authorityId" swaggertype:"string" example:"int 角色id"`
+#	Enable       int    `json:"enable" swaggertype:"string" example:"int 是否启用"`
+#	AuthorityIds []uint `json:"authorityIds" swaggertype:"string" example:"[]uint 角色id"`
+#	Phone        string `json:"phone" example:"电话号码"`
+#	Email        string `json:"email" example:"电子邮箱"`
+#}
+```
+这是一个user结构体，请你用go语言输入相关必要字段
+
+### 代码
+从写好的register接口出发，移植了该部分
+做成了一个能T行输入用户的代码
+
+批量导入用户，userList文件格式如下
+一个T表示行数，行的格式如下
+Username NickName Phone Email QQ
+
+> 运行命令
+> ./go_build_adduser_go_linux
+
+
+### 如何使用（docker部署完成之后）
+
+首先需要进入项目根目录
 
 ```
+# 修改/server/addUser/usersList文件中的内容
+docker cp ./server/addUser gva-server:/go/src/github.com/flipped-aurora/gin-vue-admin/server
+# 把这个小工具所在文件夹复制到gva-server中
+docker exec -it gva-server /bin/sh
+# 进入gva-server容器中
+cd ./addUser
+chmod +x ./go_build_adduser_go_linux
+# 增加权限
+./go_build_adduser_go_linux
+```
+运行成功后注意检查是否有报错，用户的username不可以有重复的
+创建的用户都是普通用户
+## docker 部署
+### 1.从github上拉取源码
+```
+git clone https://github.com/cfddd/gin-vue-admin.git
+```
+### 2.拉取镜像
+```
+docker pull cfddfc/whpu:server
+docker pull cfddfc/whpu:web
+```
 
-## 5. 主要功能
+### 3.生成镜像
+需要修改名字为原来使用的名字
+```
+docker tag cfddfc/whpu:server docker-compose-server:latest
+docker tag cfddfc/whpu:web docker-compose-web:latest
+```
 
-- 权限管理：基于`jwt`和`casbin`实现的权限管理。
-- 文件上传下载：实现基于`七牛云`, `阿里云`, `腾讯云` 的文件上传操作(请开发自己去各个平台的申请对应 `token` 或者对应`key`)。
-- 分页封装：前端使用 `mixins` 封装分页，分页方法调用 `mixins` 即可。
-- 用户管理：系统管理员分配用户角色和角色权限。
-- 角色管理：创建权限控制的主要对象，可以给角色分配不同api权限和菜单权限。
-- 菜单管理：实现用户动态菜单配置，实现不同角色不同菜单。
-- api管理：不同用户可调用的api接口的权限不同。
-- 配置管理：配置文件可前台修改(在线体验站点不开放此功能)。
-- 条件搜索：增加条件搜索示例。
-- restful示例：可以参考用户管理模块中的示例API。
-	- 前端文件参考: [web/src/view/superAdmin/api/api.vue](https://github.com/flipped-aurora/gin-vue-admin/blob/master/web/src/view/superAdmin/api/api.vue)
-    - 后台文件参考: [server/router/sys_api.go](https://github.com/flipped-aurora/gin-vue-admin/blob/master/server/router/sys_api.go)
-- 多点登录限制：需要在`config.yaml`中把`system`中的`use-multipoint`修改为true(需要自行配置Redis和Config中的Redis参数，测试阶段，有bug请及时反馈)。
-- 分片上传：提供文件分片上传和大文件分片上传功能示例。
-- 表单生成器：表单生成器借助 [@Variant Form](https://github.com/vform666/variant-form) 。
-- 代码生成器：后台基础逻辑以及简单curd的代码生成器。
+### 4.运行代码
+[详细内容](https://www.gin-vue-admin.com/guide/deployment/docker-compose.html#docker-compose-yaml%E8%AF%A6%E8%A7%A3)
 
-## 6. 知识库 
+**首先需要进入项目根目录**
 
-## 6.1 团队博客
+启动容器
 
-> https://www.yuque.com/flipped-aurora
+```
+# 使用docker-compose 后台启动
+docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
+```
+### 5.配置数据库信息
+就是把数据库文件信息以sql文件导出，然后进入mysql容器里面再导入
+
+数据卷怎么上传？不会(看了官网的文档，使用ORS上传到dockerHub上，然后再拉下来，然后替换就可以了，感觉也没有很方便……)！
+
+至于为什么不写进启动的命令里，是因为每次启动都会调用这些命令行，所以只在第一次部署的时候注入
+
+> 导出的命令是mysqldump -u root -p -P 13306 gva > D:\goland\gin-vue-admin\dumpAll.sql 
 >
->内有前端框架教学视频。如果觉得项目对您有所帮助可以添加我的个人微信:shouzi_1994，欢迎您提出宝贵的需求。
+> 该命令是用于从一个 SQL 文件中恢复一个数据库的。但是，如果您的 SQL 文件是用 Windows PowerShell 和 mysqldump 命令创建的，可能会出现编码问题。因为 PowerShell 的默认编码是 UTF-16，而 MySQL 不支持这种编码1。这可能导致您的 SQL 文件中出现一些不可识别的字符，从而引发错误。
+>
+> 解决这个问题的方法之一是，使用 --result-file 选项来生成 ASCII 格式的输出文件1。例如：
+>
+> mysqldump -u root -p -P 13306 gva --result-file=D:\goland\gin-vue-admin\dumpAll.sql
+> 
+>-P是宿主机链接数据库的端口
+>
+> 然后，您可以用这个文件来恢复数据库：
 
-## 6.2 教学视频
+下面是把sql文件导入数据库的命令
 
-（1）手把手教学视频
+```
+docker stop gva-server 
+# 先关闭server容器（反正在数据库迁移后需要重启server容器）
 
-> https://www.bilibili.com/video/BV1Rg411u7xH/
+docker cp dumpAll.sql gva-mysql:/
+# 复制文件dumpAll.sql到gva-mysql容器里面
 
-（2）后端目录结构调整介绍以及使用方法
+docker exec -it gva-mysql /bin/bash
+# 进入gva-mysql容器
 
-> https://www.bilibili.com/video/BV1x44y117TT/
+mysql -u root -p --binary-mode --force gva < ./dumpAll.sql
+# 导入sql文件
+```
+### 6.完成
+退出容器，然后重新启动容器
+```
+exit
+# 退出容器
+docker-compose -f deploy/docker-compose/docker-compose.yaml up
+# 使用docker-compose启动四个容器
+docker-compose -f deploy/docker-compose/docker-compose.yaml up -d
+# 后台启动
+```
 
-（3）golang基础教学视频
+接下来就可以访问了
+地址为服务器IP:端口
+```
+http://xxxx:8080
+```
+## docker自动执行sql文件
+每次需要删除卷，才可以重新生成一遍
+删除卷之前要将正在使用卷的容器停止
+```
+docker stop gva-mysql
+docker rm gva-mysql
+docker volume rm docker-compose_mysql
+docker-compose -f deploy/docker-compose/docker-compose.yaml up --build -d
+```
+## 排行榜更新
+可以选择排序的类别
+以及一些大大小小的逻辑优化
 
-> bilibili：https://space.bilibili.com/322210472/channel/detail?cid=108884
+和前面的每日打卡排行榜类似，使用数据库进行排序（数据量小）
 
-（4）gin框架基础教学
 
-> bilibili：https://space.bilibili.com/322210472/channel/detail?cid=126418&ctype=0
+## tips
+### return语句后面没有显式地指定返回值
+```go
+// GetDailyAlgorithmRecord 根据id获取DailyAlgorithmRecord记录
+// Author [piexlmax](https://github.com/piexlmax)
+func (DARService *DailyAlgorithmRecordService) GetDailyAlgorithmRecord(id uint) (DAR DailyAlgorithm.DailyAlgorithmRecord, err error) {
+	err = global.GVA_DB.Where("id = ?", id).First(&DAR).Error
+	return
+}
+```
+在GetDailyAlgorithmRecord方法中，return语句后面没有显式地指定返回值。这是因为在函数定义中已经定义了函数的返回类型。
 
-（5）gin-vue-admin 版本更新介绍视频
+在这种情况下，函数会自动将函数内部定义的局部变量作为返回值返回。在GetDailyAlgorithmRecord方法中，DAR和err变量是在函数内部定义的，并且它们的类型与函数的返回类型匹配。
 
-> bilibili：https://www.bilibili.com/video/BV1kv4y1g7nT
+因此，当执行return语句时，函数会自动将DAR和err变量的值作为返回值返回，无需显式指定。
 
-## 7. 联系方式
-
-### 7.1 技术群
-
-### QQ交流群：622360840
-| QQ 群 |
-|  :---:  |
-| <img src="http://qmplusimg.henrongyi.top/qq.jpg" width="180"/> |
-
-### 微信交流群
-| 微信 |
-|  :---:  | 
-| <img width="150" src="http://qmplusimg.henrongyi.top/qrjjz.png"> 
-
-添加微信，备注"加入gin-vue-admin交流群"
-
-### [关于我们](https://www.gin-vue-admin.com/about/join.html)
-
-## 8. 贡献者
-
-感谢您对gin-vue-admin的贡献!
-
-<a href="https://github.com/flipped-aurora/gin-vue-admin/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=flipped-aurora/gin-vue-admin" />
-</a>
-
-## 9. 捐赠
-
-如果你觉得这个项目对你有帮助，你可以请作者喝饮料 :tropical_drink: [点我](https://www.gin-vue-admin.com/coffee/index.html)
-
-## 10. 商用注意事项
-
-如果您将此项目用于商业用途，请遵守Apache2.0协议并保留作者技术支持声明。
+这种方式使得代码更加简洁，同时也符合Go语言的函数返回值规范。调用方可以使用多重赋值的方式接收返回值。
